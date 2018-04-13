@@ -6,8 +6,10 @@
 //  Copyright © 2018年 emsihyo. All rights reserved.
 //
 
-#import "OOHTTPTaskQueue.h"
+#import <UIKit/UIKit.h>
+
 #import "AFHTTPRequestSerializer+OOHTTP.h"
+#import "OOHTTPTaskQueue.h"
 
 NSErrorDomain const OOHTTPTaskErrorDomain = @"OOHTTPTaskErrorDomainKey";
 
@@ -274,8 +276,11 @@ NSErrorDomain const OOHTTPTaskErrorDomain = @"OOHTTPTaskErrorDomainKey";
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillEnterForeground) name:UIApplicationWillEnterForegroundNotification object:nil];
     return self;
 }
-
 - (void)appDidEnterBackground{
+    if ([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground) {
+        return;
+    }
+    if (self.backgroundTaskId) return;
     self.backgroundTaskId=[[UIApplication sharedApplication]beginBackgroundTaskWithExpirationHandler:^{
         self.backgroundTaskId=UIBackgroundTaskInvalid;
         if (!self.timer) return;
@@ -304,6 +309,13 @@ NSErrorDomain const OOHTTPTaskErrorDomain = @"OOHTTPTaskErrorDomainKey";
 }
 
 - (OOHTTPTask *)POST:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter constructingBodyWithBlock:(void (^)(id <AFMultipartFormData> formData))block progress:(void (^)(NSProgress *uploadProgress))uploadProgress completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion{
+    if ([NSThread currentThread].isMainThread){
+        [self appDidEnterBackground];
+    }else{
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            [self appDidEnterBackground];
+        });
+    }
     OOHTTPTask *task=[self.taskClass POST:url headers:headers parameters:parameters retryAfter:retryAfter constructingBodyWithBlock:block progress:uploadProgress taskQueue:self completion:completion];
     return task;
 
