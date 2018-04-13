@@ -11,6 +11,8 @@
 
 #import "AFHTTPRequestSerializer+OOHTTP.h"
 
+NSString *const oo_http_header_key = @"oo-http-header-key";
+
 void oo_http_parseHeaders(id source,NSDictionary *allHeaders,NSURL **targetUrl,NSDictionary **targetHeaders) {
     NSURL *url;
    if([source isKindOfClass:NSURL.class]){
@@ -35,8 +37,6 @@ void oo_http_parseHeaders(id source,NSDictionary *allHeaders,NSURL **targetUrl,N
         }
     }
 }
-
-NSString *const oo_http_header_key = @"oo-http-header-key";
 
 @implementation AFHTTPRequestSerializer (OOHTTP)
 
