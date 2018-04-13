@@ -278,28 +278,40 @@ NSErrorDomain const OOHTTPTaskErrorDomain = @"OOHTTPTaskErrorDomainKey";
 }
 - (void)appDidEnterBackground{
     if ([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground) return;
-    if (self.backgroundTaskId) return;
-    self.backgroundTaskId=[[UIApplication sharedApplication]beginBackgroundTaskWithExpirationHandler:^{
-        self.backgroundTaskId=UIBackgroundTaskInvalid;
-        dispatch_source_cancel(self.timer);
-        self.timer=nil;
-    }];
+    if (self.backgroundTaskId!=UIBackgroundTaskInvalid) return;
     __weak typeof(self)weakSelf=self;
+    self.backgroundTaskId=[[UIApplication sharedApplication]beginBackgroundTaskWithExpirationHandler:^{
+        __strong typeof(weakSelf) self = weakSelf;
+        if (self.timer) {
+            dispatch_source_cancel(self.timer);
+            self.timer=nil;
+        }
+        [self cancelAllOperations];
+        self.backgroundTaskId=UIBackgroundTaskInvalid;
+    }];
     self.timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_main_queue());
     dispatch_source_set_timer(self.timer, DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC, 0 * NSEC_PER_SEC);
     dispatch_source_set_event_handler(self.timer, ^{
         __strong typeof(weakSelf) self=weakSelf;
         if (self.operationCount>0&&[UIApplication sharedApplication].backgroundTimeRemaining>10) return;
+        if (self.timer) {
+            dispatch_source_cancel(self.timer);
+            self.timer=nil;
+        }
         [self cancelAllOperations];
-        if (!self.backgroundTaskId) return;
-        [[UIApplication sharedApplication] endBackgroundTask:self.backgroundTaskId];
+        [[UIApplication sharedApplication]endBackgroundTask:self.backgroundTaskId];
+        self.backgroundTaskId=UIBackgroundTaskInvalid;
     });
     dispatch_resume(self.timer);
 }
 
 - (void)appWillEnterForeground{
-    if (!self.backgroundTaskId) return;
-    [[UIApplication sharedApplication] endBackgroundTask:self.backgroundTaskId];
+    if (self.timer) {
+        dispatch_source_cancel(self.timer);
+        self.timer=nil;
+    }
+    [[UIApplication sharedApplication]endBackgroundTask:self.backgroundTaskId];
+    self.backgroundTaskId=UIBackgroundTaskInvalid;
 }
 
 - (OOHTTPTask *)POST:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter constructingBodyWithBlock:(void (^)(id <AFMultipartFormData> formData))block progress:(void (^)(NSProgress *uploadProgress))uploadProgress completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion{
