@@ -8,7 +8,6 @@
 
 #import <OOHTTP/OODataHTTPRequestSerializer.h>
 #import <OOHTTP/OODataHTTPResponseSerializer.h>
-#import <OOHTTP/OOHTTPTask.h>
 #import <OOHTTP/OOHTTPTaskQueue.h>
 #import <UIKit/UIKit.h>
 
