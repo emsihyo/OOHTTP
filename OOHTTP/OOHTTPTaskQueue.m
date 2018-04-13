@@ -7,6 +7,7 @@
 //
 
 #import "OOHTTPTaskQueue.h"
+#import "AFHTTPRequestSerializer+OOHTTP.h"
 
 NSErrorDomain const OOHTTPTaskErrorDomain = @"OOHTTPTaskErrorDomainKey";
 
