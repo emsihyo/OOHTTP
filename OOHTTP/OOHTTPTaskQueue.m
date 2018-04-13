@@ -277,35 +277,30 @@ NSErrorDomain const OOHTTPTaskErrorDomain = @"OOHTTPTaskErrorDomainKey";
 
 - (void)appDidEnterBackground{
     self.backgroundTaskId=[[UIApplication sharedApplication]beginBackgroundTaskWithExpirationHandler:^{
-        [self cancelAllOperations];
-        [[UIApplication sharedApplication] endBackgroundTask:self.backgroundTaskId];
         self.backgroundTaskId=UIBackgroundTaskInvalid;
+        if (!self.timer) return;
+        dispatch_source_cancel(self.timer);
+        self.timer=nil;
     }];
     if (self.timer) {
         dispatch_source_cancel(self.timer);
     }
     __weak typeof(self)weakSelf=self;
     self.timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_main_queue());
-    dispatch_source_set_timer(self.timer, DISPATCH_TIME_NOW, 2 * NSEC_PER_SEC, 0 * NSEC_PER_SEC);
+    dispatch_source_set_timer(self.timer, DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC, 0 * NSEC_PER_SEC);
     dispatch_source_set_event_handler(self.timer, ^{
-        if ([UIApplication sharedApplication].backgroundTimeRemaining<10) {
-            if (weakSelf.timer) {
-                dispatch_source_cancel(weakSelf.timer);
-            }
-            [[UIApplication sharedApplication] endBackgroundTask:weakSelf.backgroundTaskId];
-            weakSelf.backgroundTaskId=UIBackgroundTaskInvalid;
-        }
+        __strong typeof(weakSelf) self=weakSelf;
+        if (self.operationCount>0&&[UIApplication sharedApplication].backgroundTimeRemaining>10) return;
+        [self cancelAllOperations];
+        if (!self.backgroundTaskId) return;
+        [[UIApplication sharedApplication] endBackgroundTask:self.backgroundTaskId];
     });
     dispatch_resume(self.timer);
 }
 
 - (void)appWillEnterForeground{
-    if (self.timer) {
-        dispatch_source_cancel(self.timer);
-        self.timer=nil;
-    }
+    if (!self.backgroundTaskId) return;
     [[UIApplication sharedApplication] endBackgroundTask:self.backgroundTaskId];
-    self.backgroundTaskId=UIBackgroundTaskInvalid;
 }
 
 - (OOHTTPTask *)POST:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter constructingBodyWithBlock:(void (^)(id <AFMultipartFormData> formData))block progress:(void (^)(NSProgress *uploadProgress))uploadProgress completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion{
