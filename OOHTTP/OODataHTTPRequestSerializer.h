@@ -6,7 +6,7 @@
 //  Copyright © 2018年 emsihyo. All rights reserved.
 //
 
-@import AFNetworking;
+#import <AFNetworking/AFNetworking.h>
 
 @interface OODataHTTPRequestSerializer : AFHTTPRequestSerializer
 

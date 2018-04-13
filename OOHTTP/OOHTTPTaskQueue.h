@@ -6,9 +6,8 @@
 //  Copyright © 2018年 emsihyo. All rights reserved.
 //
 
+#import <AFNetworking/AFNetworking.h>
 #import <Foundation/Foundation.h>
-
-@import AFNetworking;
 
 FOUNDATION_EXPORT NSErrorDomain const OOOOHTTPTaskErrorDomain;
 

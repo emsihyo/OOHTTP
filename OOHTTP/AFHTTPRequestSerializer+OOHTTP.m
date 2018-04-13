@@ -6,6 +6,8 @@
 //  Copyright © 2018年 emsihyo. All rights reserved.
 //
 
+#import <JRSwizzle/JRSwizzle.h>
+
 #import "AFHTTPRequestSerializer+OOHTTP.h"
 
 void oo_http_parseHeaders(id source,NSDictionary *allHeaders,NSURL **targetUrl,NSDictionary **targetHeaders) {
@@ -34,8 +36,6 @@ void oo_http_parseHeaders(id source,NSDictionary *allHeaders,NSURL **targetUrl,N
 }
 
 NSString *const oo_http_header_key = @"oo-http-header-key";
-
-@import JRSwizzle;
 
 @implementation AFHTTPRequestSerializer (OOHTTP)
 

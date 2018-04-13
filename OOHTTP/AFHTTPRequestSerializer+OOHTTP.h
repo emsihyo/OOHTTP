@@ -6,8 +6,7 @@
 //  Copyright © 2018年 emsihyo. All rights reserved.
 //
 
-@import AFNetworking;
-
+#import <AFNetworking/AFNetworking.h>
 extern NSString *const oo_http_header_key;
 
 void oo_http_parseHeaders(id source,NSDictionary *allHeaders,NSURL **targetUrl,NSDictionary **targetHeaders);
