@@ -11,14 +11,14 @@
 		0A3F7E8720805E4D00FDA9E1 /* OOHTTPTaskQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = 0A3F7E7B20805E4B00FDA9E1 /* OOHTTPTaskQueue.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0A3F7E8820805E4D00FDA9E1 /* OODataHTTPRequestSerializer.h in Headers */ = {isa = PBXBuildFile; fileRef = 0A3F7E7C20805E4B00FDA9E1 /* OODataHTTPRequestSerializer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0A3F7E8920805E4D00FDA9E1 /* OODataHTTPRequestSerializer.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A3F7E7D20805E4C00FDA9E1 /* OODataHTTPRequestSerializer.m */; };
-		0A3F7E8A20805E4D00FDA9E1 /* AFJSONRequestSerializer+OOHTTP.h in Headers */ = {isa = PBXBuildFile; fileRef = 0A3F7E7E20805E4C00FDA9E1 /* AFJSONRequestSerializer+OOHTTP.h */; };
+		0A3F7E8A20805E4D00FDA9E1 /* AFJSONRequestSerializer+OOHTTP.h in Headers */ = {isa = PBXBuildFile; fileRef = 0A3F7E7E20805E4C00FDA9E1 /* AFJSONRequestSerializer+OOHTTP.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0A3F7E8B20805E4D00FDA9E1 /* OODataHTTPResponseSerializer.h in Headers */ = {isa = PBXBuildFile; fileRef = 0A3F7E7F20805E4C00FDA9E1 /* OODataHTTPResponseSerializer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0A3F7E8C20805E4D00FDA9E1 /* AFPropertyListRequestSerializer+OOHTTP.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A3F7E8020805E4C00FDA9E1 /* AFPropertyListRequestSerializer+OOHTTP.m */; };
-		0A3F7E8D20805E4D00FDA9E1 /* AFHTTPRequestSerializer+OOHTTP.h in Headers */ = {isa = PBXBuildFile; fileRef = 0A3F7E8120805E4C00FDA9E1 /* AFHTTPRequestSerializer+OOHTTP.h */; };
+		0A3F7E8D20805E4D00FDA9E1 /* AFHTTPRequestSerializer+OOHTTP.h in Headers */ = {isa = PBXBuildFile; fileRef = 0A3F7E8120805E4C00FDA9E1 /* AFHTTPRequestSerializer+OOHTTP.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0A3F7E8E20805E4D00FDA9E1 /* OOHTTPTaskQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A3F7E8220805E4C00FDA9E1 /* OOHTTPTaskQueue.m */; };
 		0A3F7E8F20805E4D00FDA9E1 /* AFJSONRequestSerializer+OOHTTP.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A3F7E8320805E4C00FDA9E1 /* AFJSONRequestSerializer+OOHTTP.m */; };
 		0A3F7E9020805E4D00FDA9E1 /* OODataHTTPResponseSerializer.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A3F7E8420805E4C00FDA9E1 /* OODataHTTPResponseSerializer.m */; };
-		0A3F7E9120805E4D00FDA9E1 /* AFPropertyListRequestSerializer+OOHTTP.h in Headers */ = {isa = PBXBuildFile; fileRef = 0A3F7E8520805E4C00FDA9E1 /* AFPropertyListRequestSerializer+OOHTTP.h */; };
+		0A3F7E9120805E4D00FDA9E1 /* AFPropertyListRequestSerializer+OOHTTP.h in Headers */ = {isa = PBXBuildFile; fileRef = 0A3F7E8520805E4C00FDA9E1 /* AFPropertyListRequestSerializer+OOHTTP.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0A3F7E9220805E4D00FDA9E1 /* AFHTTPRequestSerializer+OOHTTP.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A3F7E8620805E4D00FDA9E1 /* AFHTTPRequestSerializer+OOHTTP.m */; };
 /* End PBXBuildFile section */
 
@@ -102,10 +102,10 @@
 				0A3F7E7420805D9800FDA9E1 /* OOHTTP.h in Headers */,
 				0A3F7E8720805E4D00FDA9E1 /* OOHTTPTaskQueue.h in Headers */,
 				0A3F7E8B20805E4D00FDA9E1 /* OODataHTTPResponseSerializer.h in Headers */,
-				0A3F7E8820805E4D00FDA9E1 /* OODataHTTPRequestSerializer.h in Headers */,
 				0A3F7E9120805E4D00FDA9E1 /* AFPropertyListRequestSerializer+OOHTTP.h in Headers */,
 				0A3F7E8D20805E4D00FDA9E1 /* AFHTTPRequestSerializer+OOHTTP.h in Headers */,
 				0A3F7E8A20805E4D00FDA9E1 /* AFJSONRequestSerializer+OOHTTP.h in Headers */,
+				0A3F7E8820805E4D00FDA9E1 /* OODataHTTPRequestSerializer.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

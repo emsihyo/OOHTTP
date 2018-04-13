@@ -6,6 +6,9 @@
 //  Copyright © 2018年 emsihyo. All rights reserved.
 //
 
+#import <OOHTTP/AFHTTPRequestSerializer.h>
+#import <OOHTTP/AFJSONRequestSerializer>
+#import <OOHTTP/AFPropertyListRequestSerializer>
 #import <OOHTTP/OODataHTTPRequestSerializer.h>
 #import <OOHTTP/OODataHTTPResponseSerializer.h>
 #import <OOHTTP/OOHTTPTaskQueue.h>
