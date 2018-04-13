@@ -6,7 +6,8 @@
 //  Copyright © 2018年 emsihyo. All rights reserved.
 //
 
-#import <JRSwizzle/JRSwizzle.h>
+@import JRSwizzle;
+
 #import <objc/runtime.h>
 
 #import "AFHTTPRequestSerializer+OOHTTP.h"
