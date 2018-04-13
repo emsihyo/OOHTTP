@@ -7,6 +7,7 @@
 //
 
 #import <JRSwizzle/JRSwizzle.h>
+#import <objc/runtime.h>
 
 #import "AFHTTPRequestSerializer+OOHTTP.h"
 
