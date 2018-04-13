@@ -132,7 +132,7 @@ NSErrorDomain const OOHTTPTaskErrorDomain = @"OOHTTPTaskErrorDomainKey";
             [items addObject:item];
             urlComponents.queryItems=items;
             self.urlStringWithHeaderKey=[urlComponents string];
-            [manager.requestSerializer oo_http_setHTTPHeaders:self.headers forKey:oo_http_header_key];
+            [manager.requestSerializer oo_http_setHTTPHeaders:self.headers forKey:headerKey];
         }
     }else{
         self.urlStringWithHeaderKey=self.urlString;
