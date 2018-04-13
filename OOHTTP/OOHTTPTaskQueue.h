@@ -9,15 +9,15 @@
 @import AFNetworking;
 #import <Foundation/Foundation.h>
 
-FOUNDATION_EXPORT NSErrorDomain const OOOOHTTPTaskErrorDomain;
+FOUNDATION_EXPORT NSErrorDomain const OOHTTPTaskErrorDomain;
 
-NS_ERROR_ENUM(OOOOHTTPTaskErrorDomain){
-    OOOOHTTPTaskErrorCancelled = -999,
-    OOOOHTTPTaskErrorBadNetwork,
-    OOOOHTTPTaskErrorNonNetwork,
-    OOOOHTTPTaskErrorClientError,
-    OOOOHTTPTaskErrorServerError,
-    OOOOHTTPTaskErrorAPIError
+NS_ERROR_ENUM(OOHTTPTaskErrorDomain){
+    OOHTTPTaskErrorCancelled = -999,
+    OOHTTPTaskErrorBadNetwork,
+    OOHTTPTaskErrorNonNetwork,
+    OOHTTPTaskErrorClientError,
+    OOHTTPTaskErrorServerError,
+    OOHTTPTaskErrorAPIError
 };
 
 #ifndef OOHTTPRetryInterval

@@ -7,9 +7,8 @@
 //
 
 #import "OOHTTPTaskQueue.h"
-#import "AFHTTPRequestSerializer+OOHTTP.h"
 
-NSErrorDomain const OOOOHTTPTaskErrorDomain = @"OOOOHTTPTaskErrorDomainKey";
+NSErrorDomain const OOHTTPTaskErrorDomain = @"OOHTTPTaskErrorDomainKey";
 
 @interface OOHTTPTaskQueue ()
 
@@ -102,7 +101,7 @@ NSErrorDomain const OOOOHTTPTaskErrorDomain = @"OOOOHTTPTaskErrorDomainKey";
 - (void)_start{
     if (self.isCancelled) {
         self.ooFinished=YES;
-        self.error=[NSError errorWithDomain:OOOOHTTPTaskErrorDomain code:OOOOHTTPTaskErrorCancelled userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"取消操作", nil)}];
+        self.error=[NSError errorWithDomain:OOHTTPTaskErrorDomain code:OOHTTPTaskErrorCancelled userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"取消操作", nil)}];
         [self notify:nil error:self.error];
         return;
     }
@@ -111,7 +110,7 @@ NSErrorDomain const OOOOHTTPTaskErrorDomain = @"OOOOHTTPTaskErrorDomainKey";
     if (!manager) {
         self.ooExecuting=NO;
         self.ooFinished=YES;
-        self.error=[NSError errorWithDomain:OOOOHTTPTaskErrorDomain code:OOOOHTTPTaskErrorCancelled userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"取消操作", nil)}];
+        self.error=[NSError errorWithDomain:OOHTTPTaskErrorDomain code:OOHTTPTaskErrorCancelled userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"取消操作", nil)}];
         [self notify:nil error:self.error];
         return;
     }
@@ -119,7 +118,7 @@ NSErrorDomain const OOOOHTTPTaskErrorDomain = @"OOOOHTTPTaskErrorDomainKey";
         if (!self.urlStringWithHeaderKey) {
             NSURLComponents *urlComponents=[NSURLComponents componentsWithString:self.urlString];
             if (!urlComponents) {
-                self.error=[NSError errorWithDomain:OOOOHTTPTaskErrorDomain code:OOOOHTTPTaskErrorClientError userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"客户端错误", nil)}];
+                self.error=[NSError errorWithDomain:OOHTTPTaskErrorDomain code:OOHTTPTaskErrorClientError userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"客户端错误", nil)}];
                 [self notify:nil error:self.error];
                 return;
             }
@@ -169,22 +168,22 @@ NSErrorDomain const OOOOHTTPTaskErrorDomain = @"OOOOHTTPTaskErrorDomainKey";
         return;
     }
     if ([error.domain isEqualToString:AFURLRequestSerializationErrorDomain]) {
-        self.error=[NSError errorWithDomain:OOOOHTTPTaskErrorDomain code:OOOOHTTPTaskErrorClientError userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"客户端错误", nil),NSUnderlyingErrorKey:error}];
+        self.error=[NSError errorWithDomain:OOHTTPTaskErrorDomain code:OOHTTPTaskErrorClientError userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"客户端错误", nil),NSUnderlyingErrorKey:error}];
     }else if([error.domain isEqualToString:AFURLResponseSerializationErrorDomain]){
-        self.error=[NSError errorWithDomain:OOOOHTTPTaskErrorDomain code:OOOOHTTPTaskErrorClientError userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"服务端错误", nil),NSUnderlyingErrorKey:error}];
+        self.error=[NSError errorWithDomain:OOHTTPTaskErrorDomain code:OOHTTPTaskErrorClientError userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"服务端错误", nil),NSUnderlyingErrorKey:error}];
     }else if([error.domain isEqualToString:NSURLErrorDomain]){
         switch (error.code) {
             case NSURLErrorCancelled:
-                self.error=[NSError errorWithDomain:OOOOHTTPTaskErrorDomain code:OOOOHTTPTaskErrorCancelled userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"取消操作", nil),NSUnderlyingErrorKey:error}];
+                self.error=[NSError errorWithDomain:OOHTTPTaskErrorDomain code:OOHTTPTaskErrorCancelled userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"取消操作", nil),NSUnderlyingErrorKey:error}];
                 break;
             case NSURLErrorTimedOut:
-                self.error=[NSError errorWithDomain:OOOOHTTPTaskErrorDomain code:OOOOHTTPTaskErrorBadNetwork userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"请求超时", nil),NSUnderlyingErrorKey:error}];
+                self.error=[NSError errorWithDomain:OOHTTPTaskErrorDomain code:OOHTTPTaskErrorBadNetwork userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"请求超时", nil),NSUnderlyingErrorKey:error}];
                 break;
             case NSURLErrorNotConnectedToInternet:
-                self.error=[NSError errorWithDomain:OOOOHTTPTaskErrorDomain code:OOOOHTTPTaskErrorNonNetwork userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"无网络", nil),NSUnderlyingErrorKey:error}];
+                self.error=[NSError errorWithDomain:OOHTTPTaskErrorDomain code:OOHTTPTaskErrorNonNetwork userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"无网络", nil),NSUnderlyingErrorKey:error}];
                 break;
             default:
-                self.error=[NSError errorWithDomain:OOOOHTTPTaskErrorDomain code:OOOOHTTPTaskErrorBadNetwork userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"网络或者服务器异常", nil),NSUnderlyingErrorKey:error}];
+                self.error=[NSError errorWithDomain:OOHTTPTaskErrorDomain code:OOHTTPTaskErrorBadNetwork userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"网络或者服务器异常", nil),NSUnderlyingErrorKey:error}];
                 break;
         }
     }
@@ -207,7 +206,7 @@ NSErrorDomain const OOOOHTTPTaskErrorDomain = @"OOOOHTTPTaskErrorDomainKey";
     if (!manager) {
         self.ooExecuting=NO;
         self.ooFinished=YES;
-        self.error=[NSError errorWithDomain:OOOOHTTPTaskErrorDomain code:OOOOHTTPTaskErrorCancelled userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"取消操作", nil)}];
+        self.error=[NSError errorWithDomain:OOHTTPTaskErrorDomain code:OOHTTPTaskErrorCancelled userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"取消操作", nil)}];
         [self notify:responseObject error:self.error];
         [self.lock unlock];
         return;
@@ -240,7 +239,7 @@ NSErrorDomain const OOOOHTTPTaskErrorDomain = @"OOOOHTTPTaskErrorDomainKey";
         self.after=nil;
     }
     if (self.task) [self.task cancel];
-    self.error=[NSError errorWithDomain:OOOOHTTPTaskErrorDomain code:OOOOHTTPTaskErrorCancelled userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"取消操作", nil)}];
+    self.error=[NSError errorWithDomain:OOHTTPTaskErrorDomain code:OOHTTPTaskErrorCancelled userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"取消操作", nil)}];
     [self notify:nil error:self.error];
     [self.lock unlock];
 }
