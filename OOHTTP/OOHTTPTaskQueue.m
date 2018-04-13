@@ -277,9 +277,7 @@ NSErrorDomain const OOHTTPTaskErrorDomain = @"OOHTTPTaskErrorDomainKey";
     return self;
 }
 - (void)appDidEnterBackground{
-    if ([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground) {
-        return;
-    }
+    if ([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground) return;
     if (self.backgroundTaskId) return;
     self.backgroundTaskId=[[UIApplication sharedApplication]beginBackgroundTaskWithExpirationHandler:^{
         self.backgroundTaskId=UIBackgroundTaskInvalid;
