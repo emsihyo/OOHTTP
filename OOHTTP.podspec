@@ -11,6 +11,7 @@ Pod::Spec.new do |s|
     s.platform = :ios
     s.ios.deployment_target = '8.0'
     s.source_files = 'OOHTTP/*.{h,m}'
+    s.framework = 'UIKit'
     s.dependency 'AFNetworking'
     s.dependency 'JRSwizzle'
 end
