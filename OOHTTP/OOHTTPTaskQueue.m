@@ -28,7 +28,7 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
 @property (nonatomic,assign) BOOL                 ooFinished;
 @property (nonatomic,assign) BOOL                 ooSuspended;
 @property (nonatomic,strong) NSLock               *lock;
-
+@property (nonatomic,weak)   OOHTTPTaskQueue      *taskQueue;
 @property (nonatomic,assign) OOHTTPTaskType       taskType;
 @property (nonatomic,strong) NSString             *urlString;
 @property (nonatomic,strong) NSString             *urlStringWithHeaderKey;
@@ -149,12 +149,13 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
 }
 
 - (OOHTTPTask*)createTaskWithURL:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion{
-    OOHTTPTask *task=[[OOHTTPTask alloc]init];
-    task.urlString=[url isKindOfClass:NSURL.class]?[url absoluteURL]:url;
-    task.headers=headers;
-    task.parameters=parameters;
-    task.retryAfter=retryAfter;
+    OOHTTPTask *task = [[OOHTTPTask alloc]init];
+    task.urlString = [url isKindOfClass:NSURL.class]?[url absoluteURL]:url;
+    task.headers = headers;
+    task.parameters = parameters;
+    task.retryAfter = retryAfter;
     task.completion = completion;
+    task.taskQueue = self;
     return task;
 }
 
@@ -235,7 +236,7 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
 }
 
 - (AFHTTPSessionManager*)sessionManager{
-    return [(OOHTTPTaskQueue*)[NSOperationQueue currentQueue] sessionManager];
+    return [self.taskQueue sessionManager];
 }
 
 - (void)setOoSuspended:(BOOL)ooSuspended{
