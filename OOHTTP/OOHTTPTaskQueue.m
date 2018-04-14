@@ -86,15 +86,11 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
 }
 
 - (void)appDidEnterBackground{
-    dispatch_sync(self.underlyingQueue, ^{
-        [self beginBackgroundTaskIfNeed];
-    });
+    [self beginBackgroundTaskIfNeed];
 }
 
 - (void)appWillEnterForeground{
-    dispatch_sync(self.underlyingQueue, ^{
-        [self endBackgroundTaskIfNeed];
-    });
+    [self endBackgroundTaskIfNeed];
 }
 
 - (void)beginBackgroundTaskIfNeed{
@@ -126,26 +122,9 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context{
     if (context!=OOHTTPTaskQueueContext) return;
-    if ([keyPath isEqualToString:@"operationCount"]) {
-        
-        if ([change[NSKeyValueChangeNewKey] integerValue]==0) {
-            if ([NSThread isMainThread]) {
-                [self endBackgroundTaskIfNeed];
-            }else{
-                dispatch_sync(dispatch_get_main_queue(), ^{
-                    [self endBackgroundTaskIfNeed];
-                });
-            }
-        }else {
-            if ([NSThread isMainThread]) {
-                [self beginBackgroundTaskIfNeed];
-            }else{
-                dispatch_sync(dispatch_get_main_queue(), ^{
-                    [self beginBackgroundTaskIfNeed];
-                });
-            }
-        }
-    }
+    if (![keyPath isEqualToString:@"operationCount"]) return;
+    if ([change[NSKeyValueChangeNewKey] integerValue]==0) [self endBackgroundTaskIfNeed];
+    else [self beginBackgroundTaskIfNeed];
 }
 
 - (OOHTTPTask*)createTaskWithURL:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion{
@@ -290,6 +269,8 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
     else if (!self.urlStringWithHeaderKey) {
         NSURLComponents *urlComponents=[NSURLComponents componentsWithString:self.urlString];
         if (!urlComponents) {
+            self.ooExecuting=NO;
+            self.ooFinished=YES;
             self.latestError=[NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorBadURL userInfo:nil];
             [self notify:nil error:self.latestError];
             return;
