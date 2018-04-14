@@ -125,7 +125,6 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context{
-    [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     if (context!=OOHTTPTaskQueueContext) return;
     if ([keyPath isEqualToString:@"operationCount"]) {
         if ([change[NSKeyValueChangeNewKey] integerValue]==0) {
