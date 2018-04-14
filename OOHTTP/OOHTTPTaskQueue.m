@@ -213,6 +213,7 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
     self.lock=[[NSLock alloc]init];
     return self;
 }
+
 - (void)setOoFinished:(BOOL)ooFinished{
     [self willChangeValueForKey:@"isFinished"];
     _ooFinished=ooFinished;
@@ -236,6 +237,7 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
 - (AFHTTPSessionManager*)sessionManager{
     return [(OOHTTPTaskQueue*)[NSOperationQueue currentQueue] sessionManager];
 }
+
 - (void)setOoSuspended:(BOOL)ooSuspended{
     [self.lock lock];
     if(_ooSuspended==ooSuspended) {
@@ -247,6 +249,7 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
     else [self _start];
     [self.lock unlock];
 }
+
 - (BOOL)isAsynchronous{
     return YES;
 }
@@ -396,7 +399,6 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
     dispatch_resume(self.after);
     [self.lock unlock];
 }
-
 
 - (void)notify:(id)responseObject error:(NSError*)error{
     [self.sessionManager.requestSerializer oo_http_removeHTTPHeadersForKey:self.urlStringWithHeaderKey];
