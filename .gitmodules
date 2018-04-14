@@ -1,0 +1,6 @@
+[submodule "Frameworks/JRSwizzle"]
+	path = Frameworks/JRSwizzle
+	url = https://github.com/rentzsch/jrswizzle.git
+[submodule "Frameworks/AFNetworking"]
+	path = Frameworks/AFNetworking
+	url = https://github.com/AFNetworking/AFNetworking.git
