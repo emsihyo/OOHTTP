@@ -127,14 +127,23 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context{
     if (context!=OOHTTPTaskQueueContext) return;
     if ([keyPath isEqualToString:@"operationCount"]) {
+        
         if ([change[NSKeyValueChangeNewKey] integerValue]==0) {
-            dispatch_sync(dispatch_get_main_queue(), ^{
+            if ([NSThread isMainThread]) {
                 [self endBackgroundTaskIfNeed];
-            });
+            }else{
+                dispatch_sync(dispatch_get_main_queue(), ^{
+                    [self endBackgroundTaskIfNeed];
+                });
+            }
         }else {
-            dispatch_sync(dispatch_get_main_queue(), ^{
-               [self beginBackgroundTaskIfNeed];
-            });
+            if ([NSThread isMainThread]) {
+                [self beginBackgroundTaskIfNeed];
+            }else{
+                dispatch_sync(dispatch_get_main_queue(), ^{
+                    [self beginBackgroundTaskIfNeed];
+                });
+            }
         }
     }
 }
