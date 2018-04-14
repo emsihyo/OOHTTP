@@ -11,241 +11,51 @@
 #import "AFHTTPRequestSerializer+OOHTTP.h"
 #import "OOHTTPTaskQueue.h"
 
-NSErrorDomain const OOHTTPTaskErrorDomain = @"OOHTTPTaskErrorDomainKey";
+static void * OOHTTPTaskQueueContext = &OOHTTPTaskQueueContext;
 
-@interface OOHTTPTaskQueue ()
-
-@property (nonatomic,strong) AFHTTPSessionManager       *manager;
-@property (nonatomic,assign) Class                      taskClass;
-@property (nonatomic,assign) UIBackgroundTaskIdentifier backgroundTaskId;
-@property (nonatomic,strong) dispatch_source_t          timer;
-
-@end
+typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
+    OOHTTPTaskTypeGet,
+    OOHTTPTaskTypePost,
+    OOHTTPTaskTypeHead,
+    OOHTTPTaskTypePut,
+    OOHTTPTaskTypePatch,
+    OOHTTPTaskTypeDelete
+};
 
 @interface OOHTTPTask ()
 
-@property (nonatomic,assign) BOOL             ooExecuting;
-@property (nonatomic,assign) BOOL             ooFinished;
-@property (nonatomic,strong) NSString         *urlString;
-@property (nonatomic,strong) NSString         *urlStringWithHeaderKey;
-@property (nonatomic,strong) NSDictionary     *headers;
-@property (nonatomic,strong) NSDictionary     *parameters;
-@property (nonatomic,strong) id               responseObject;
-@property (nonatomic,strong) NSURLSessionTask *task;
-@property (nonatomic,weak  ) OOHTTPTaskQueue  *taskQueue;
-@property (nonatomic,strong) NSError          *error;
-@property (nonatomic,strong) NSLock           *lock;
-@property (nonatomic,assign) NSInteger        currentRetryTime;
+@property (nonatomic,assign) BOOL                 ooExecuting;
+@property (nonatomic,assign) BOOL                 ooFinished;
+@property (nonatomic,assign) BOOL                 ooSuspended;
+@property (nonatomic,strong) NSLock               *lock;
+
+@property (nonatomic,assign) OOHTTPTaskType       taskType;
+@property (nonatomic,strong) NSString             *urlString;
+@property (nonatomic,strong) NSString             *urlStringWithHeaderKey;
+@property (nonatomic,strong) NSDictionary         *headers;
+@property (nonatomic,strong) NSDictionary         *parameters;
+@property (nonatomic,strong) id                   responseObject;
+
+@property (readonly        ) AFHTTPSessionManager *sessionManager;
+@property (nonatomic,strong) NSURLSessionTask     *sessionTask;
+
+@property (nonatomic,assign) NSInteger            currentRetryTime;
+@property (nonatomic,strong) NSError              *latestError;
+
 @property (nonatomic,strong) OOHTTPRetryInterval (^retryAfter)(OOHTTPTask * task,NSInteger currentRetryTime,NSError * error);
-@property (nonatomic,strong) void (^constructingBodyBlock) (id <AFMultipartFormData> formData);
-@property (nonatomic,strong) void (^finishBlock)(OOHTTPTask *task,id reponseObject,NSError* error);
-@property (nonatomic,strong) void (^progressBlock) (NSProgress * progress);
+@property (nonatomic,strong) void (^constructingBody) (id <AFMultipartFormData> formData);
+@property (nonatomic,strong) void (^completion)(OOHTTPTask *task,id reponseObject,NSError* error);
+@property (nonatomic,strong) void (^uploadProgress) (NSProgress * progress);
+@property (nonatomic,strong) void (^downloadProgress) (NSProgress * progress);
 @property (nonatomic,strong) dispatch_source_t after;
 
 @end
 
-@implementation OOHTTPTask
+@interface OOHTTPTaskQueue ()
 
-+ (instancetype)POST:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter constructingBodyWithBlock:(void (^)(id <AFMultipartFormData> formData))block progress:(void (^)(NSProgress *uploadProgress))uploadProgress taskQueue:(__kindof NSOperationQueue*)taskQueue completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion{
-    OOHTTPTask *task=[[self alloc]init];
-    task.urlString=[url isKindOfClass:NSURL.class]?[url absoluteString]:url;
-    task.headers=headers;
-    task.parameters=parameters;
-    task.finishBlock = completion;
-    task.constructingBodyBlock = block;
-    task.progressBlock = uploadProgress;
-    task.retryAfter = retryAfter;
-    task.taskQueue=taskQueue;
-    [taskQueue addOperation:task];
-    return task;
-    
-}
-
-- (instancetype)init{
-    self=[super init];
-    if (!self)return nil;
-    self.lock=[[NSLock alloc]init];
-    return self;
-}
-- (void)setOoFinished:(BOOL)mFinished{
-    [self willChangeValueForKey:@"isFinished"];
-    _ooFinished=mFinished;
-    [self didChangeValueForKey:@"isFinished"];
-}
-
-- (void)setOoExecuting:(BOOL)mExecuting{
-    [self willChangeValueForKey:@"isExecuting"];
-    _ooExecuting=mExecuting;
-    [self didChangeValueForKey:@"isExecuting"];
-}
-
-- (BOOL)isExecuting{
-    return _ooExecuting;
-}
-
-- (BOOL)isFinished{
-    return _ooFinished;
-}
-
-- (BOOL)isConcurrent{
-    return YES;
-}
-
-- (BOOL)isAsynchronous{
-    return YES;
-}
-
-- (void)start{
-    [self.lock lock];
-    [self _start];
-    [self.lock unlock];
-}
-
-- (void)_start{
-    if (self.isCancelled) {
-        self.ooFinished=YES;
-        self.error=[NSError errorWithDomain:OOHTTPTaskErrorDomain code:OOHTTPTaskErrorCancelled userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"取消操作", nil)}];
-        [self notify:nil error:self.error];
-        return;
-    }
-    self.ooExecuting=YES;
-    AFHTTPSessionManager *manager=self.taskQueue.manager;
-    if (!manager) {
-        self.ooExecuting=NO;
-        self.ooFinished=YES;
-        self.error=[NSError errorWithDomain:OOHTTPTaskErrorDomain code:OOHTTPTaskErrorCancelled userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"取消操作", nil)}];
-        [self notify:nil error:self.error];
-        return;
-    }
-    if (self.headers) {
-        if (!self.urlStringWithHeaderKey) {
-            NSURLComponents *urlComponents=[NSURLComponents componentsWithString:self.urlString];
-            if (!urlComponents) {
-                self.error=[NSError errorWithDomain:OOHTTPTaskErrorDomain code:OOHTTPTaskErrorClientError userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"客户端错误", nil)}];
-                [self notify:nil error:self.error];
-                return;
-            }
-            NSString *headerKey=[[NSUUID UUID]UUIDString];
-            NSMutableArray *items=[[urlComponents queryItems] mutableCopy];
-            if (!items) {
-                items=[NSMutableArray array];
-            }
-            NSURLQueryItem *item=[NSURLQueryItem queryItemWithName:oo_http_header_key value:headerKey];
-            [items addObject:item];
-            urlComponents.queryItems=items;
-            self.urlStringWithHeaderKey=[urlComponents string];
-            [manager.requestSerializer oo_http_setHTTPHeaders:self.headers forKey:headerKey];
-        }
-    }else{
-        self.urlStringWithHeaderKey=self.urlString;
-    }
-    __weak typeof(self) weakSelf=self;
-    if (self.constructingBodyBlock) {
-        self.task=[manager POST:self.urlStringWithHeaderKey parameters:self.parameters constructingBodyWithBlock:self.constructingBodyBlock progress:self.progressBlock success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
-            [weakSelf taskDidFinish:task response:responseObject error:nil];
-        } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-            [weakSelf taskDidFinish:task response:nil error:error];
-        }];
-    }else{
-        self.task=[manager POST:self.urlStringWithHeaderKey parameters:self.parameters progress:self.progressBlock success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
-            [weakSelf taskDidFinish:task response:responseObject error:nil];
-        } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-            [weakSelf taskDidFinish:task response:nil error:error];
-        }];
-    }
-}
-
-- (void)taskDidFinish:(NSURLSessionTask *)task response:(id)responseObject error:(NSError *)error{
-    [self.lock lock];
-    self.task=nil;
-    self.responseObject=responseObject;
-    if (self.isCancelled||self.isFinished) {
-        [self.lock unlock];
-        return;
-    }
-    if (!error) {
-        self.ooExecuting=NO;
-        self.ooFinished=YES;
-        [self notify:responseObject error:nil];
-        [self.lock unlock];
-        return;
-    }
-    if ([error.domain isEqualToString:AFURLRequestSerializationErrorDomain]) {
-        self.error=[NSError errorWithDomain:OOHTTPTaskErrorDomain code:OOHTTPTaskErrorClientError userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"客户端错误", nil),NSUnderlyingErrorKey:error}];
-    }else if([error.domain isEqualToString:AFURLResponseSerializationErrorDomain]){
-        self.error=[NSError errorWithDomain:OOHTTPTaskErrorDomain code:OOHTTPTaskErrorClientError userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"服务端错误", nil),NSUnderlyingErrorKey:error}];
-    }else if([error.domain isEqualToString:NSURLErrorDomain]){
-        switch (error.code) {
-            case NSURLErrorCancelled:
-                self.error=[NSError errorWithDomain:OOHTTPTaskErrorDomain code:OOHTTPTaskErrorCancelled userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"取消操作", nil),NSUnderlyingErrorKey:error}];
-                break;
-            case NSURLErrorTimedOut:
-                self.error=[NSError errorWithDomain:OOHTTPTaskErrorDomain code:OOHTTPTaskErrorBadNetwork userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"请求超时", nil),NSUnderlyingErrorKey:error}];
-                break;
-            case NSURLErrorNotConnectedToInternet:
-                self.error=[NSError errorWithDomain:OOHTTPTaskErrorDomain code:OOHTTPTaskErrorNonNetwork userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"无网络", nil),NSUnderlyingErrorKey:error}];
-                break;
-            default:
-                self.error=[NSError errorWithDomain:OOHTTPTaskErrorDomain code:OOHTTPTaskErrorBadNetwork userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"网络或者服务器异常", nil),NSUnderlyingErrorKey:error}];
-                break;
-        }
-    }
-    if (!self.retryAfter) {
-        self.ooExecuting=NO;
-        self.ooFinished=YES;
-        [self notify:nil error:self.error];
-        [self.lock unlock];
-        return;
-    }
-    OOHTTPRetryInterval interval=self.retryAfter(self,++self.currentRetryTime,error);
-    if (interval==HTTRetryDisabled) {
-        self.ooExecuting=NO;
-        self.ooFinished=YES;
-        [self notify:responseObject error:self.error];
-        [self.lock unlock];
-        return;
-    }
-    AFHTTPSessionManager *manager=self.taskQueue.manager;
-    if (!manager) {
-        self.ooExecuting=NO;
-        self.ooFinished=YES;
-        self.error=[NSError errorWithDomain:OOHTTPTaskErrorDomain code:OOHTTPTaskErrorCancelled userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"取消操作", nil)}];
-        [self notify:responseObject error:self.error];
-        [self.lock unlock];
-        return;
-    }
-    __weak typeof(self) weakSelf=self;
-    dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, manager.completionQueue?manager.completionQueue:dispatch_get_main_queue());
-    dispatch_source_set_timer(timer, DISPATCH_TIME_NOW, interval * NSEC_PER_SEC, 0 * NSEC_PER_SEC);
-    dispatch_source_set_event_handler(timer, ^{
-        dispatch_source_cancel(weakSelf.after);
-        weakSelf.after=nil;
-        [weakSelf _start];
-    });
-    dispatch_resume(timer);
-    self.after=timer;
-    [self.lock unlock];
-}
-
-
-- (void)notify:(id)responseObject error:(NSError*)error{
-    [self.taskQueue.manager.requestSerializer oo_http_removeHTTPHeadersForKey:self.urlStringWithHeaderKey];
-    if(self.finishBlock) self.finishBlock(self,responseObject,error);
-}
-
-- (void)cancel{
-    [self.lock lock];
-    self.ooExecuting=NO;
-    self.ooFinished=YES;
-    if (self.after) {
-        dispatch_source_cancel(self.after);
-        self.after=nil;
-    }
-    if (self.task) [self.task cancel];
-    self.error=[NSError errorWithDomain:OOHTTPTaskErrorDomain code:OOHTTPTaskErrorCancelled userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"取消操作", nil)}];
-    [self notify:nil error:self.error];
-    [self.lock unlock];
-}
+@property (nonatomic,assign) Class                      taskClass;
+@property (nonatomic,assign) UIBackgroundTaskIdentifier backgroundTaskId;
+@property (nonatomic,strong) AFHTTPSessionManager       *sessionManager;
 
 @end
 
@@ -253,11 +63,8 @@ NSErrorDomain const OOHTTPTaskErrorDomain = @"OOHTTPTaskErrorDomainKey";
 
 - (void)dealloc{
     [self cancelAllOperations];
+    [self removeObserver:self forKeyPath:@"operationCount" context:OOHTTPTaskQueueContext];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    if (self.timer) {
-        dispatch_source_cancel(self.timer);
-        self.timer=nil;
-    }
 }
 
 - (instancetype)init{
@@ -269,61 +76,335 @@ NSErrorDomain const OOHTTPTaskErrorDomain = @"OOHTTPTaskErrorDomainKey";
 - (instancetype)initWithHTTPSessionManager:(AFHTTPSessionManager*)sessionManager taskClass:(Class)taskClass{
     self=[super init];
     if (!self) return nil;
-    self.manager=sessionManager;
     NSParameterAssert(taskClass==nil||[taskClass isKindOfClass:OOHTTPTask.class]);
+    self.sessionManager=sessionManager;
     self.taskClass=taskClass?taskClass:OOHTTPTask.class;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appDidEnterBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillEnterForeground) name:UIApplicationWillEnterForegroundNotification object:nil];
+    [self addObserver:self forKeyPath:@"operationCount" options:NSKeyValueObservingOptionNew context:OOHTTPTaskQueueContext];
     return self;
 }
+
 - (void)appDidEnterBackground{
-    if ([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground) return;
-    if (self.backgroundTaskId!=UIBackgroundTaskInvalid) return;
-    __weak typeof(self)weakSelf=self;
-    self.backgroundTaskId=[[UIApplication sharedApplication]beginBackgroundTaskWithExpirationHandler:^{
-        __strong typeof(weakSelf) self = weakSelf;
-        if (self.timer) {
-            dispatch_source_cancel(self.timer);
-            self.timer=nil;
-        }
-        [self cancelAllOperations];
-        self.backgroundTaskId=UIBackgroundTaskInvalid;
-    }];
-    self.timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_main_queue());
-    dispatch_source_set_timer(self.timer, DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC, 0 * NSEC_PER_SEC);
-    dispatch_source_set_event_handler(self.timer, ^{
-        __strong typeof(weakSelf) self=weakSelf;
-        if (self.operationCount>0&&[UIApplication sharedApplication].backgroundTimeRemaining>10) return;
-        if (self.timer) {
-            dispatch_source_cancel(self.timer);
-            self.timer=nil;
-        }
-        [self cancelAllOperations];
-        [[UIApplication sharedApplication]endBackgroundTask:self.backgroundTaskId];
-        self.backgroundTaskId=UIBackgroundTaskInvalid;
-    });
-    dispatch_resume(self.timer);
+    [self beginBackgroundTaskIfNeed];
 }
 
 - (void)appWillEnterForeground{
-    if (self.timer) {
-        dispatch_source_cancel(self.timer);
-        self.timer=nil;
-    }
-    [[UIApplication sharedApplication]endBackgroundTask:self.backgroundTaskId];
-    self.backgroundTaskId=UIBackgroundTaskInvalid;
+    [self endBackgroundTaskIfNeed];
 }
 
-- (OOHTTPTask *)POST:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter constructingBodyWithBlock:(void (^)(id <AFMultipartFormData> formData))block progress:(void (^)(NSProgress *uploadProgress))uploadProgress completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion{
+- (void)allOperationDidComplete{
+    [self endBackgroundTaskIfNeed];
+}
+
+- (void)beginBackgroundTaskIfNeed{
+    void (^block)(void)=^{
+        if ([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground) return;
+        if (self.backgroundTaskId!=UIBackgroundTaskInvalid) return;
+        if (self.operationCount==0) return;
+        __weak typeof(self)weakSelf=self;
+        self.backgroundTaskId=[[UIApplication sharedApplication]beginBackgroundTaskWithExpirationHandler:^{
+            __strong typeof(weakSelf) self = weakSelf;
+            self.suspended=YES;
+            self.backgroundTaskId=UIBackgroundTaskInvalid;
+        }];
+    };
     if ([NSThread currentThread].isMainThread){
-        [self appDidEnterBackground];
+        block();
     }else{
         dispatch_sync(dispatch_get_main_queue(), ^{
-            [self appDidEnterBackground];
+            block();
         });
     }
-    OOHTTPTask *task=[self.taskClass POST:url headers:headers parameters:parameters retryAfter:retryAfter constructingBodyWithBlock:block progress:uploadProgress taskQueue:self completion:completion];
-    return task;
+    
+}
 
+- (void)endBackgroundTaskIfNeed{
+    void (^block)(void)=^{
+        if ([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground) return;
+        if (self.backgroundTaskId!=UIBackgroundTaskInvalid) return;
+        [[UIApplication sharedApplication]endBackgroundTask:self.backgroundTaskId];
+        self.backgroundTaskId=UIBackgroundTaskInvalid;
+    };
+    if ([NSThread currentThread].isMainThread){
+        block();
+    }else{
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            block();
+        });
+    }
+}
+
+- (void)setSuspended:(BOOL)suspended{
+    [super setSuspended:suspended];
+    [self.operations enumerateObjectsUsingBlock:^(OOHTTPTask * task, NSUInteger idx, BOOL * _Nonnull stop) {
+        task.ooSuspended=suspended;
+    }];
+}
+
+- (OOHTTPTask*)createTaskWithURL:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion{
+    OOHTTPTask *task=[[OOHTTPTask alloc]init];
+    task.urlString=[url isKindOfClass:NSURL.class]?[url absoluteURL]:url;
+    task.headers=headers;
+    task.parameters=parameters;
+    task.retryAfter=retryAfter;
+    task.completion = completion;
+    return task;
+}
+
+- (OOHTTPTask *)GET:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter   downloadProgress:(void (^)(NSProgress *progress))downloadProgress completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion{
+    OOHTTPTask *task=[self createTaskWithURL:url headers:headers parameters:parameters retryAfter:retryAfter completion:completion];
+    task.taskType=OOHTTPTaskTypeGet;
+    task.downloadProgress = downloadProgress;
+    [super addOperation:task];
+    return task;
+}
+
+- (OOHTTPTask *)POST:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter constructingBody:(void (^)(id <AFMultipartFormData> formData))constructingBody uploadProgress:(void (^)(NSProgress *progress))uploadProgress completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion{
+    OOHTTPTask *task=[self createTaskWithURL:url headers:headers parameters:parameters retryAfter:retryAfter completion:completion];
+    task.taskType=OOHTTPTaskTypePost;
+    task.uploadProgress = uploadProgress;
+    task.constructingBody = constructingBody;
+    [super addOperation:task];
+    return task;
+}
+
+- (OOHTTPTask *)HEAD:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter  completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion{
+    OOHTTPTask *task=[self createTaskWithURL:url headers:headers parameters:parameters retryAfter:retryAfter completion:completion];
+    task.taskType=OOHTTPTaskTypeHead;
+    [super addOperation:task];
+    return task;
+}
+
+- (OOHTTPTask *)PUT:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion{
+    OOHTTPTask *task=[self createTaskWithURL:url headers:headers parameters:parameters retryAfter:retryAfter completion:completion];
+    task.taskType=OOHTTPTaskTypePut;
+    [super addOperation:task];
+    return task;
+}
+
+- (OOHTTPTask *)PATCH:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion{
+    OOHTTPTask *task=[self createTaskWithURL:url headers:headers parameters:parameters retryAfter:retryAfter completion:completion];
+    task.taskType=OOHTTPTaskTypePatch;
+    [super addOperation:task];
+    return task;
+}
+
+- (OOHTTPTask *)DELETE:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion{
+    OOHTTPTask *task=[self createTaskWithURL:url headers:headers parameters:parameters retryAfter:retryAfter completion:completion];
+    task.taskType=OOHTTPTaskTypeDelete;
+    [super addOperation:task];
+    return task;
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context{
+    [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    if (context!=OOHTTPTaskQueueContext) return;
+    if ([keyPath isEqualToString:@"operationCount"]) {
+        if ([change[NSKeyValueChangeNewKey] integerValue]==0) [self endBackgroundTaskIfNeed];
+        else [self beginBackgroundTaskIfNeed];
+    }
 }
 @end
+
+@implementation OOHTTPTask
+
+- (instancetype)init{
+    self=[super init];
+    if (!self)return nil;
+    self.lock=[[NSLock alloc]init];
+    return self;
+}
+- (void)setOoFinished:(BOOL)ooFinished{
+    [self willChangeValueForKey:@"isFinished"];
+    _ooFinished=ooFinished;
+    [self didChangeValueForKey:@"isFinished"];
+}
+
+- (void)setOoExecuting:(BOOL)ooExecuting{
+    [self willChangeValueForKey:@"isExecuting"];
+    _ooExecuting=ooExecuting;
+    [self didChangeValueForKey:@"isExecuting"];
+}
+
+- (BOOL)isExecuting{
+    return _ooExecuting;
+}
+
+- (BOOL)isFinished{
+    return _ooFinished;
+}
+
+- (AFHTTPSessionManager*)sessionManager{
+    return [(OOHTTPTaskQueue*)[NSOperationQueue currentQueue] sessionManager];
+}
+- (void)setOoSuspended:(BOOL)ooSuspended{
+    [self.lock lock];
+    if(_ooSuspended==ooSuspended) {
+        [self.lock unlock];
+        return;
+    }
+    _ooSuspended=ooSuspended;
+    if(ooSuspended) [self _cancel];
+    else [self _start];
+    [self.lock unlock];
+}
+- (BOOL)isAsynchronous{
+    return YES;
+}
+
+- (void)start{
+    [self.lock lock];
+    [self _start];
+    [self.lock unlock];
+}
+
+- (void)cancel{
+    [self.lock lock];
+    [super cancel];
+    [self _cancel];
+    self.latestError=[NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorCancelled userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"The connection was cancelled.", nil)}];
+    [self notify:nil error:self.latestError];
+    [self.lock unlock];
+}
+
+- (void)_cancel{
+    if (self.after) {
+        dispatch_source_cancel(self.after);
+        self.after=nil;
+    }
+    if (self.sessionTask) [self.sessionTask cancel];
+}
+
+- (void)_start{
+    [self _cancel];
+    if (self.isCancelled) return;
+    if (self.ooSuspended) return;
+    if (!self.isReady) return;
+    self.ooExecuting=YES;
+    AFHTTPSessionManager *sessionManager=self.sessionManager;
+    NSCParameterAssert(sessionManager);
+    if (!self.headers.count) self.urlStringWithHeaderKey=self.urlString;
+    else if (!self.urlStringWithHeaderKey) {
+        NSURLComponents *urlComponents=[NSURLComponents componentsWithString:self.urlString];
+        if (!urlComponents) {
+            self.latestError=[NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorBadURL userInfo:nil];
+            [self notify:nil error:self.latestError];
+            return;
+        }
+        NSString *headerKey=[[NSUUID UUID]UUIDString];
+        NSMutableArray *items=[[urlComponents queryItems] mutableCopy];
+        if (!items) items=[NSMutableArray array];
+        [items addObject:[NSURLQueryItem queryItemWithName:oo_http_header_key value:headerKey]];
+        urlComponents.queryItems=items;
+        self.urlStringWithHeaderKey=[urlComponents string];
+        [sessionManager.requestSerializer oo_http_setHTTPHeaders:self.headers forKey:headerKey];
+    }
+    __weak typeof(self) weakSelf=self;
+    switch (self.taskType) {
+        case OOHTTPTaskTypeGet:{
+            self.sessionTask=[sessionManager GET:self.urlStringWithHeaderKey parameters:self.parameters progress:self.downloadProgress success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+                [weakSelf taskDidFinish:task response:responseObject error:nil];
+            } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+                [weakSelf taskDidFinish:task response:nil error:error];
+            }];
+        } break;
+        case OOHTTPTaskTypePost:{
+            if (self.constructingBody) {
+                self.sessionTask=[sessionManager POST:self.urlStringWithHeaderKey parameters:self.parameters constructingBodyWithBlock:self.constructingBody progress:self.uploadProgress success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+                    [weakSelf taskDidFinish:task response:responseObject error:nil];
+                } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+                    [weakSelf taskDidFinish:task response:nil error:error];
+                }];
+            }else{
+                self.sessionTask=[sessionManager POST:self.urlStringWithHeaderKey parameters:self.parameters progress:self.uploadProgress success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+                    [weakSelf taskDidFinish:task response:responseObject error:nil];
+                } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+                    [weakSelf taskDidFinish:task response:nil error:error];
+                }];
+            }
+        } break;
+        case OOHTTPTaskTypeHead:{
+            self.sessionTask=[sessionManager HEAD:self.urlStringWithHeaderKey parameters:self.parameters success:^(NSURLSessionDataTask * _Nonnull task) {
+                [weakSelf taskDidFinish:task response:nil error:nil];
+            } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+                [weakSelf taskDidFinish:task response:nil error:error];
+            }];
+        } break;
+        case OOHTTPTaskTypePut:{
+            self.sessionTask=[sessionManager PUT:self.urlStringWithHeaderKey parameters:self.parameters success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+                [weakSelf taskDidFinish:task response:responseObject error:nil];
+            } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+                [weakSelf taskDidFinish:task response:nil error:error];
+            }];
+        } break;
+        case OOHTTPTaskTypePatch:{
+            self.sessionTask=[sessionManager PATCH:self.urlStringWithHeaderKey parameters:self.parameters success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+                [weakSelf taskDidFinish:task response:responseObject error:nil];
+            } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+                [weakSelf taskDidFinish:task response:nil error:error];
+            }];
+        } break;
+        case OOHTTPTaskTypeDelete:{
+            self.sessionTask=[sessionManager DELETE:self.urlStringWithHeaderKey parameters:self.parameters success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+                [weakSelf taskDidFinish:task response:responseObject error:nil];
+            } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+                [weakSelf taskDidFinish:task response:nil error:error];
+            }];
+        } break;
+    }
+}
+
+- (void)taskDidFinish:(NSURLSessionTask *)task response:(id)responseObject error:(NSError *)error{
+    [self.lock lock];
+    self.sessionTask=nil;
+    if (self.isFinished||self.ooSuspended||self.isCancelled) {
+        [self.lock unlock];
+        return;
+    }
+    if (!error) {
+        self.ooExecuting=NO;
+        self.ooFinished=YES;
+        self.responseObject=responseObject;
+        [self notify:self.responseObject error:nil];
+        [self.lock unlock];
+        return;
+    }
+    self.latestError=error;
+    if (!self.retryAfter) {
+        self.ooExecuting=NO;
+        self.ooFinished=YES;
+        [self notify:nil error:self.latestError];
+        [self.lock unlock];
+        return;
+    }
+    OOHTTPRetryInterval interval=self.retryAfter(self,++self.currentRetryTime,error);
+    if (interval==HTTRetryDisabled) {
+        self.ooExecuting=NO;
+        self.ooFinished=YES;
+        [self notify:nil error:self.latestError];
+        [self.lock unlock];
+        return;
+    }
+    __weak typeof(self) weakSelf=self;
+    self.after = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, [NSOperationQueue currentQueue].underlyingQueue?[NSOperationQueue currentQueue].underlyingQueue:dispatch_get_main_queue());
+    dispatch_source_set_timer(self.after, DISPATCH_TIME_NOW, interval * NSEC_PER_SEC, 0 * NSEC_PER_SEC);
+    dispatch_source_set_event_handler(self.after, ^{
+        __strong typeof(weakSelf) self=weakSelf;
+        dispatch_source_cancel(self.after);
+        self.after=nil;
+        [self _start];
+    });
+    dispatch_resume(self.after);
+    [self.lock unlock];
+}
+
+
+- (void)notify:(id)responseObject error:(NSError*)error{
+    [self.sessionManager.requestSerializer oo_http_removeHTTPHeadersForKey:self.urlStringWithHeaderKey];
+    if(self.completion) self.completion(self,responseObject,error);
+}
+
+@end
+
+

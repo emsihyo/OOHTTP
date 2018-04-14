@@ -7,18 +7,8 @@
 //
 
 @import AFNetworking;
+
 #import <Foundation/Foundation.h>
-
-FOUNDATION_EXPORT NSErrorDomain const OOHTTPTaskErrorDomain;
-
-NS_ERROR_ENUM(OOHTTPTaskErrorDomain){
-    OOHTTPTaskErrorCancelled = -999,
-    OOHTTPTaskErrorBadNetwork,
-    OOHTTPTaskErrorNonNetwork,
-    OOHTTPTaskErrorClientError,
-    OOHTTPTaskErrorServerError,
-    OOHTTPTaskErrorAPIError
-};
 
 #ifndef OOHTTPRetryInterval
 #define OOHTTPRetryInterval NSTimeInterval
@@ -26,6 +16,13 @@ NS_ERROR_ENUM(OOHTTPTaskErrorDomain){
 #endif
 
 @interface OOHTTPTask : NSOperation
+
+@property (readonly) NSString         *urlString;
+@property (readonly) NSDictionary     *headers;
+@property (readonly) NSDictionary     *parameters;
+@property (readonly) NSInteger        currentRetryTime;
+@property (readonly) NSError          *latestError;
+@property (readonly) id               responseObject;
 
 @end
 
@@ -39,6 +36,16 @@ NS_ERROR_ENUM(OOHTTPTaskErrorDomain){
 
 - (instancetype)initWithHTTPSessionManager:(AFHTTPSessionManager*)sessionManager taskClass:(Class)taskClass NS_DESIGNATED_INITIALIZER; 
 
-- (OOHTTPTask *)POST:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter constructingBodyWithBlock:(void (^)(id <AFMultipartFormData> formData))block progress:(void (^)(NSProgress *uploadProgress))uploadProgress completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion;
+- (OOHTTPTask *)GET:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter   downloadProgress:(void (^)(NSProgress *progress))downloadProgress completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion;
+
+- (OOHTTPTask *)POST:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter constructingBody:(void (^)(id <AFMultipartFormData> formData))constructingBody uploadProgress:(void (^)(NSProgress *progress))uploadProgress completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion;
+
+- (OOHTTPTask *)HEAD:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter  completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion;
+
+- (OOHTTPTask *)PUT:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion;
+
+- (OOHTTPTask *)PATCH:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion;
+
+- (OOHTTPTask *)DELETE:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion;
 
 @end
