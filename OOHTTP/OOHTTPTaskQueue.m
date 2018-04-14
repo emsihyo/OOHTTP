@@ -93,46 +93,44 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
     [self endBackgroundTaskIfNeed];
 }
 
-- (void)allOperationDidComplete{
-    [self endBackgroundTaskIfNeed];
-}
-
 - (void)beginBackgroundTaskIfNeed{
-    void (^block)(void)=^{
-        if ([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground) return;
-        if (self.backgroundTaskId!=UIBackgroundTaskInvalid) return;
-        if (self.operationCount==0) return;
-        __weak typeof(self)weakSelf=self;
-        self.backgroundTaskId=[[UIApplication sharedApplication]beginBackgroundTaskWithExpirationHandler:^{
-            __strong typeof(weakSelf) self = weakSelf;
-            self.suspended=YES;
-            self.backgroundTaskId=UIBackgroundTaskInvalid;
-        }];
-    };
-    if ([NSThread currentThread].isMainThread){
-        block();
-    }else{
-        dispatch_sync(dispatch_get_main_queue(), ^{
-            block();
-        });
-    }
-    
+    dispatch_sync(self.underlyingQueue, ^{
+        void (^block)(void)=^{
+            if ([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground) return;
+            if (self.backgroundTaskId!=UIBackgroundTaskInvalid) return;
+            if (self.operationCount==0) return;
+            __weak typeof(self)weakSelf=self;
+            self.backgroundTaskId=[[UIApplication sharedApplication]beginBackgroundTaskWithExpirationHandler:^{
+                __strong typeof(weakSelf) self = weakSelf;
+                self.suspended=YES;
+                self.backgroundTaskId=UIBackgroundTaskInvalid;
+            }];
+        };
+        if ([NSThread currentThread].isMainThread) block();
+        else{
+            dispatch_sync(dispatch_get_main_queue(), ^{
+                block();
+            });
+        }
+    });
 }
 
 - (void)endBackgroundTaskIfNeed{
-    void (^block)(void)=^{
-        if ([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground) return;
-        if (self.backgroundTaskId!=UIBackgroundTaskInvalid) return;
-        [[UIApplication sharedApplication]endBackgroundTask:self.backgroundTaskId];
-        self.backgroundTaskId=UIBackgroundTaskInvalid;
-    };
-    if ([NSThread currentThread].isMainThread){
-        block();
-    }else{
-        dispatch_sync(dispatch_get_main_queue(), ^{
-            block();
-        });
-    }
+    dispatch_sync(self.underlyingQueue, ^{
+        void (^block)(void)=^{
+            if ([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground) return;
+            if (self.backgroundTaskId==UIBackgroundTaskInvalid) return;
+            if (self.operationCount>0) return;
+            [[UIApplication sharedApplication]endBackgroundTask:self.backgroundTaskId];
+            self.backgroundTaskId=UIBackgroundTaskInvalid;
+        };
+        if ([NSThread currentThread].isMainThread) block();
+        else{
+            dispatch_sync(dispatch_get_main_queue(), ^{
+                block();
+            });
+        }
+    });
 }
 
 - (void)setSuspended:(BOOL)suspended{
