@@ -86,51 +86,35 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
 }
 
 - (void)appDidEnterBackground{
-    [self beginBackgroundTaskIfNeed];
+    dispatch_sync(self.underlyingQueue, ^{
+        [self beginBackgroundTaskIfNeed];
+    });
 }
 
 - (void)appWillEnterForeground{
-    [self endBackgroundTaskIfNeed];
+    dispatch_sync(self.underlyingQueue, ^{
+        [self endBackgroundTaskIfNeed];
+    });
 }
 
 - (void)beginBackgroundTaskIfNeed{
-    dispatch_sync(self.underlyingQueue, ^{
-        void (^block)(void)=^{
-            if ([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground) return;
-            if (self.backgroundTaskId!=UIBackgroundTaskInvalid) return;
-            if (self.operationCount==0) return;
-            __weak typeof(self)weakSelf=self;
-            self.backgroundTaskId=[[UIApplication sharedApplication]beginBackgroundTaskWithExpirationHandler:^{
-                __strong typeof(weakSelf) self = weakSelf;
-                self.suspended=YES;
-                self.backgroundTaskId=UIBackgroundTaskInvalid;
-            }];
-        };
-        if ([NSThread currentThread].isMainThread) block();
-        else{
-            dispatch_sync(dispatch_get_main_queue(), ^{
-                block();
-            });
-        }
-    });
+    if ([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground) return;
+    if (self.backgroundTaskId!=UIBackgroundTaskInvalid) return;
+    if (self.operationCount==0) return;
+    __weak typeof(self)weakSelf=self;
+    self.backgroundTaskId=[[UIApplication sharedApplication]beginBackgroundTaskWithExpirationHandler:^{
+        __strong typeof(weakSelf) self = weakSelf;
+        self.suspended=YES;
+        self.backgroundTaskId=UIBackgroundTaskInvalid;
+    }];
 }
 
 - (void)endBackgroundTaskIfNeed{
-    dispatch_sync(self.underlyingQueue, ^{
-        void (^block)(void)=^{
-            if ([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground) return;
-            if (self.backgroundTaskId==UIBackgroundTaskInvalid) return;
-            if (self.operationCount>0) return;
-            [[UIApplication sharedApplication]endBackgroundTask:self.backgroundTaskId];
-            self.backgroundTaskId=UIBackgroundTaskInvalid;
-        };
-        if ([NSThread currentThread].isMainThread) block();
-        else{
-            dispatch_sync(dispatch_get_main_queue(), ^{
-                block();
-            });
-        }
-    });
+    if ([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground) return;
+    if (self.backgroundTaskId==UIBackgroundTaskInvalid) return;
+    if (self.operationCount>0) return;
+    [[UIApplication sharedApplication]endBackgroundTask:self.backgroundTaskId];
+    self.backgroundTaskId=UIBackgroundTaskInvalid;
 }
 
 - (void)setSuspended:(BOOL)suspended{
@@ -138,6 +122,22 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
     [self.operations enumerateObjectsUsingBlock:^(OOHTTPTask * task, NSUInteger idx, BOOL * _Nonnull stop) {
         task.ooSuspended=suspended;
     }];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context{
+    [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    if (context!=OOHTTPTaskQueueContext) return;
+    if ([keyPath isEqualToString:@"operationCount"]) {
+        if ([change[NSKeyValueChangeNewKey] integerValue]==0) {
+            dispatch_sync(dispatch_get_main_queue(), ^{
+                [self endBackgroundTaskIfNeed];
+            });
+        }else {
+            dispatch_sync(dispatch_get_main_queue(), ^{
+               [self beginBackgroundTaskIfNeed];
+            });
+        }
+    }
 }
 
 - (OOHTTPTask*)createTaskWithURL:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion{
@@ -195,14 +195,6 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
     return task;
 }
 
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context{
-    [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
-    if (context!=OOHTTPTaskQueueContext) return;
-    if ([keyPath isEqualToString:@"operationCount"]) {
-        if ([change[NSKeyValueChangeNewKey] integerValue]==0) [self endBackgroundTaskIfNeed];
-        else [self beginBackgroundTaskIfNeed];
-    }
-}
 @end
 
 @implementation OOHTTPTask
