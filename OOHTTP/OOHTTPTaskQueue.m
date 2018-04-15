@@ -11,7 +11,7 @@
 #import "AFHTTPRequestSerializer+OOHTTP.h"
 #import "OOHTTPTaskQueue.h"
 
-static void * OOHTTPTaskQueueContext = &OOHTTPTaskQueueContext;
+static void * OOHTTPContext = &OOHTTPContext;
 
 typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
     OOHTTPTaskTypeGet,
@@ -26,7 +26,6 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
 
 @property (nonatomic,assign) BOOL                 ooExecuting;
 @property (nonatomic,assign) BOOL                 ooFinished;
-@property (nonatomic,assign) BOOL                 ooSuspended;
 @property (nonatomic,strong) NSLock               *lock;
 @property (nonatomic,weak)   OOHTTPTaskQueue      *taskQueue;
 @property (nonatomic,assign) OOHTTPTaskType       taskType;
@@ -63,7 +62,7 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
 
 - (void)dealloc{
     [self cancelAllOperations];
-    [self removeObserver:self forKeyPath:@"operationCount" context:OOHTTPTaskQueueContext];
+    [self removeObserver:self forKeyPath:@"operationCount" context:OOHTTPContext];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
@@ -81,7 +80,7 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
     self.taskClass=taskClass?taskClass:OOHTTPTask.class;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appDidEnterBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillEnterForeground) name:UIApplicationWillEnterForegroundNotification object:nil];
-    [self addObserver:self forKeyPath:@"operationCount" options:NSKeyValueObservingOptionNew context:OOHTTPTaskQueueContext];
+    [self addObserver:self forKeyPath:@"operationCount" options:NSKeyValueObservingOptionNew context:OOHTTPContext];
     return self;
 }
 
@@ -106,22 +105,14 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
 }
 
 - (void)endBackgroundTaskIfNeed{
-    if ([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground) return;
+    if (self.suspended) self.suspended=NO;
     if (self.backgroundTaskId==UIBackgroundTaskInvalid) return;
-    if (self.operationCount>0) return;
     [[UIApplication sharedApplication]endBackgroundTask:self.backgroundTaskId];
     self.backgroundTaskId=UIBackgroundTaskInvalid;
 }
 
-- (void)setSuspended:(BOOL)suspended{
-    [super setSuspended:suspended];
-    [self.operations enumerateObjectsUsingBlock:^(OOHTTPTask * task, NSUInteger idx, BOOL * _Nonnull stop) {
-        task.ooSuspended=suspended;
-    }];
-}
-
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context{
-    if (context!=OOHTTPTaskQueueContext) return;
+    if (context!=OOHTTPContext) return;
     if (![keyPath isEqualToString:@"operationCount"]) return;
     if ([change[NSKeyValueChangeNewKey] integerValue]==0) [self endBackgroundTaskIfNeed];
     else [self beginBackgroundTaskIfNeed];
@@ -187,10 +178,15 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
 
 @implementation OOHTTPTask
 
+- (void)dealloc{
+    [self removeObserver:self forKeyPath:@"taskQueue.isSuspended" context:OOHTTPContext];
+}
+
 - (instancetype)init{
     self=[super init];
     if (!self)return nil;
     self.lock=[[NSLock alloc]init];
+    [self addObserver:self forKeyPath:@"taskQueue.isSuspended" options:NSKeyValueObservingOptionNew|NSKeyValueObservingOptionNew context:OOHTTPContext];
     return self;
 }
 
@@ -216,18 +212,6 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
 
 - (AFHTTPSessionManager*)sessionManager{
     return [self.taskQueue sessionManager];
-}
-
-- (void)setOoSuspended:(BOOL)ooSuspended{
-    [self.lock lock];
-    if(_ooSuspended==ooSuspended) {
-        [self.lock unlock];
-        return;
-    }
-    _ooSuspended=ooSuspended;
-    if(ooSuspended) [self _cancel];
-    else [self _start];
-    [self.lock unlock];
 }
 
 - (BOOL)isAsynchronous{
@@ -260,7 +244,7 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
 - (void)_start{
     [self _cancel];
     if (self.isCancelled) return;
-    if (self.ooSuspended) return;
+    if (self.taskQueue.isSuspended) return;
     if (!self.isReady) return;
     self.ooExecuting=YES;
     AFHTTPSessionManager *sessionManager=self.sessionManager;
@@ -341,7 +325,7 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
 - (void)taskDidFinish:(NSURLSessionTask *)task response:(id)responseObject error:(NSError *)error{
     [self.lock lock];
     self.sessionTask=nil;
-    if (self.isFinished||self.ooSuspended||self.isCancelled) {
+    if (self.isFinished||self.taskQueue.isSuspended||self.isCancelled) {
         [self.lock unlock];
         return;
     }
@@ -387,6 +371,14 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
     if(self.completion) self.completion(self,responseObject,error);
 }
 
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context{
+    if (context!=OOHTTPContext) return;
+    if (![keyPath isEqualToString:@"taskQueue.isSuspended"]) return;
+    [self.lock lock];
+    if ([change[NSKeyValueChangeNewKey] boolValue]) [self _cancel];
+    else [self _start];
+    [self.lock unlock];
+}
 @end
 
 
