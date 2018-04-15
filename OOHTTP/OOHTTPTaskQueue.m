@@ -12,8 +12,7 @@
 #import "OOHTTPTaskQueue.h"
 
 #if OOHTTPLogEnabled
-#define NSLog(format, ...) printf("\n%s\n",[[NSString stringWithFormat:format, ## __VA_ARGS__] UTF8String]);
-#define OOHTTPLog(...) NSLog(__VA_ARGS__)
+#define OOHTTPLog(format, ...) printf("\n%s\n",[[NSString stringWithFormat:format, ## __VA_ARGS__] UTF8String])
 #else
 #define OOHTTPLog(x,...)
 #endif
