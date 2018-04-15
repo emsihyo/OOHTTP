@@ -70,6 +70,9 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
     [self cancelAllOperations];
     [self removeObserver:self forKeyPath:@"operationCount" context:OOHTTPContext];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    if (self.backgroundTaskId==UIBackgroundTaskInvalid) return;
+    [[UIApplication sharedApplication] endBackgroundTask:self.backgroundTaskId];
+    self.backgroundTaskId=UIBackgroundTaskInvalid;
 }
 
 - (instancetype)init{
