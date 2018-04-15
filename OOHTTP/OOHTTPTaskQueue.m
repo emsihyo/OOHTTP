@@ -368,7 +368,7 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
         return;
     }
     OOHTTPRetryInterval interval=self.retryAfter(self,++self.currentRetryTime,error);
-    if (interval==OOHTTRetryDisabled) {
+    if (interval==OOHTTPRetryDisabled) {
         self.ooExecuting=NO;
         self.ooFinished=YES;
         [self notify:nil error:self.latestError];

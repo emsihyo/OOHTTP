@@ -12,7 +12,7 @@
 
 #ifndef OOHTTPRetryInterval
 #define OOHTTPRetryInterval NSTimeInterval
-#define OOHTTRetryDisabled 0
+#define OOHTTPRetryDisabled 0
 #endif
 
 #ifndef OOHTTPLogEnabled
