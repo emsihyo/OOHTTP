@@ -186,7 +186,7 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
     self=[super init];
     if (!self)return nil;
     self.lock=[[NSLock alloc]init];
-    [self addObserver:self forKeyPath:@"taskQueue.isSuspended" options:NSKeyValueObservingOptionNew|NSKeyValueObservingOptionNew context:OOHTTPContext];
+    [self addObserver:self forKeyPath:@"taskQueue.isSuspended" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionOld|NSKeyValueObservingOptionNew context:OOHTTPContext];
     return self;
 }
 
@@ -375,7 +375,10 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
     if (context!=OOHTTPContext) return;
     if (![keyPath isEqualToString:@"taskQueue.isSuspended"]) return;
     [self.lock lock];
-    if ([change[NSKeyValueChangeNewKey] boolValue]) [self _cancel];
+    BOOL old =[change[NSKeyValueChangeOldKey] boolValue];
+    BOOL new =[change[NSKeyValueChangeNewKey] boolValue];
+    if (old==new) return;
+    if (new) [self _cancel];
     else [self _start];
     [self.lock unlock];
 }
