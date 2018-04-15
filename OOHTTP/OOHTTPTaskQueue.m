@@ -99,13 +99,13 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
     __weak typeof(self)weakSelf=self;
     self.backgroundTaskId=[[UIApplication sharedApplication]beginBackgroundTaskWithExpirationHandler:^{
         __strong typeof(weakSelf) self = weakSelf;
-        self.suspended=YES;
+        super.suspended=YES;
         self.backgroundTaskId=UIBackgroundTaskInvalid;
     }];
 }
 
 - (void)endBackgroundTaskIfNeed{
-    if (self.suspended) self.suspended=NO;
+    if (super.suspended) super.suspended=NO;
     if (self.backgroundTaskId==UIBackgroundTaskInvalid) return;
     [[UIApplication sharedApplication]endBackgroundTask:self.backgroundTaskId];
     self.backgroundTaskId=UIBackgroundTaskInvalid;

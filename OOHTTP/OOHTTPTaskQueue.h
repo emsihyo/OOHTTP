@@ -12,7 +12,7 @@
 
 #ifndef OOHTTPRetryInterval
 #define OOHTTPRetryInterval NSTimeInterval
-#define HTTRetryDisabled DBL_MAX
+#define HTTRetryDisabled 0
 #endif
 
 @interface OOHTTPTask : NSOperation
@@ -33,6 +33,8 @@
 - (void)addOperationWithBlock:(void (^)(void))block NS_UNAVAILABLE;
 
 - (void)addOperations:(NSArray<NSOperation *> *)ops waitUntilFinished:(BOOL)wait NS_UNAVAILABLE;
+
+- (void)setSuspended:(BOOL)suspended NS_UNAVAILABLE;
 
 - (instancetype)initWithHTTPSessionManager:(AFHTTPSessionManager*)sessionManager taskClass:(Class)taskClass NS_DESIGNATED_INITIALIZER; 
 
