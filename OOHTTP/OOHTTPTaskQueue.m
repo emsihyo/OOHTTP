@@ -11,6 +11,13 @@
 #import "AFHTTPRequestSerializer+OOHTTP.h"
 #import "OOHTTPTaskQueue.h"
 
+#if OOHTTPLogEnabled
+#define NSLog(format, ...) printf("\n%s\n",[[NSString stringWithFormat:format, ## __VA_ARGS__] UTF8String]);
+#define OOHTTPLog(...) NSLog(__VA_ARGS__)
+#else
+#define OOHTTPLog(x,...)
+#endif
+
 static void * OOHTTPContext = &OOHTTPContext;
 
 typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
@@ -97,16 +104,21 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
     if (self.backgroundTaskId!=UIBackgroundTaskInvalid) return;
     if (self.operationCount==0) return;
     __weak typeof(self)weakSelf=self;
+    OOHTTPLog(@"begin background task");
     self.backgroundTaskId=[[UIApplication sharedApplication]beginBackgroundTaskWithExpirationHandler:^{
+        OOHTTPLog(@"background task expire");
         __strong typeof(weakSelf) self = weakSelf;
-        super.suspended=YES;
+        OOHTTPLog(@"task count:%d",(int)self.operationCount);
+        self.suspended=YES;
+        OOHTTPLog(@"task count:%d",(int)self.operationCount);
         self.backgroundTaskId=UIBackgroundTaskInvalid;
     }];
 }
 
 - (void)endBackgroundTaskIfNeed{
-    if (super.suspended) super.suspended=NO;
+    if (self.suspended) self.suspended=NO;
     if (self.backgroundTaskId==UIBackgroundTaskInvalid) return;
+    OOHTTPLog(@"end background task");
     [[UIApplication sharedApplication]endBackgroundTask:self.backgroundTaskId];
     self.backgroundTaskId=UIBackgroundTaskInvalid;
 }
@@ -114,8 +126,15 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context{
     if (context!=OOHTTPContext) return;
     if (![keyPath isEqualToString:@"operationCount"]) return;
-    if ([change[NSKeyValueChangeNewKey] integerValue]==0) [self endBackgroundTaskIfNeed];
-    else [self beginBackgroundTaskIfNeed];
+    if ([NSThread isMainThread]) {
+        if ([change[NSKeyValueChangeNewKey] integerValue]==0) [self endBackgroundTaskIfNeed];
+        else [self beginBackgroundTaskIfNeed];
+    }else{
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            if ([change[NSKeyValueChangeNewKey] integerValue]==0) [self endBackgroundTaskIfNeed];
+            else [self beginBackgroundTaskIfNeed];
+        });
+    }
 }
 
 - (OOHTTPTask*)createTaskWithURL:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion{
@@ -133,7 +152,7 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
     OOHTTPTask *task=[self createTaskWithURL:url headers:headers parameters:parameters retryAfter:retryAfter completion:completion];
     task.taskType=OOHTTPTaskTypeGet;
     task.downloadProgress = downloadProgress;
-    [super addOperation:task];
+    [self addOperation:task];
     return task;
 }
 
@@ -142,35 +161,35 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
     task.taskType=OOHTTPTaskTypePost;
     task.uploadProgress = uploadProgress;
     task.constructingBody = constructingBody;
-    [super addOperation:task];
+    [self addOperation:task];
     return task;
 }
 
 - (OOHTTPTask *)HEAD:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter  completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion{
     OOHTTPTask *task=[self createTaskWithURL:url headers:headers parameters:parameters retryAfter:retryAfter completion:completion];
     task.taskType=OOHTTPTaskTypeHead;
-    [super addOperation:task];
+    [self addOperation:task];
     return task;
 }
 
 - (OOHTTPTask *)PUT:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion{
     OOHTTPTask *task=[self createTaskWithURL:url headers:headers parameters:parameters retryAfter:retryAfter completion:completion];
     task.taskType=OOHTTPTaskTypePut;
-    [super addOperation:task];
+    [self addOperation:task];
     return task;
 }
 
 - (OOHTTPTask *)PATCH:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion{
     OOHTTPTask *task=[self createTaskWithURL:url headers:headers parameters:parameters retryAfter:retryAfter completion:completion];
     task.taskType=OOHTTPTaskTypePatch;
-    [super addOperation:task];
+    [self addOperation:task];
     return task;
 }
 
 - (OOHTTPTask *)DELETE:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion{
     OOHTTPTask *task=[self createTaskWithURL:url headers:headers parameters:parameters retryAfter:retryAfter completion:completion];
     task.taskType=OOHTTPTaskTypeDelete;
-    [super addOperation:task];
+    [self addOperation:task];
     return task;
 }
 
@@ -179,14 +198,15 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
 @implementation OOHTTPTask
 
 - (void)dealloc{
-    [self removeObserver:self forKeyPath:@"taskQueue.isSuspended" context:OOHTTPContext];
+    OOHTTPLog(@"dealloc");
+    [self removeObserver:self forKeyPath:@"taskQueue.suspended" context:OOHTTPContext];
 }
 
 - (instancetype)init{
     self=[super init];
     if (!self)return nil;
     self.lock=[[NSLock alloc]init];
-    [self addObserver:self forKeyPath:@"taskQueue.isSuspended" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionOld|NSKeyValueObservingOptionNew context:OOHTTPContext];
+    [self addObserver:self forKeyPath:@"taskQueue.suspended" options:NSKeyValueObservingOptionOld|NSKeyValueObservingOptionNew context:OOHTTPContext];
     return self;
 }
 
@@ -231,6 +251,7 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
     self.latestError=[NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorCancelled userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"The connection was cancelled.", nil)}];
     [self notify:nil error:self.latestError];
     [self.lock unlock];
+    OOHTTPLog(@"task canncelled");
 }
 
 - (void)_cancel{
@@ -244,7 +265,7 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
 - (void)_start{
     [self _cancel];
     if (self.isCancelled) return;
-    if (self.taskQueue.isSuspended) return;
+    if (self.taskQueue.suspended) return;
     if (!self.isReady) return;
     self.ooExecuting=YES;
     AFHTTPSessionManager *sessionManager=self.sessionManager;
@@ -320,12 +341,13 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
             }];
         } break;
     }
+    OOHTTPLog(@"task started");
 }
 
 - (void)taskDidFinish:(NSURLSessionTask *)task response:(id)responseObject error:(NSError *)error{
     [self.lock lock];
     self.sessionTask=nil;
-    if (self.isFinished||self.taskQueue.isSuspended||self.isCancelled) {
+    if (self.isFinished||self.taskQueue.suspended||self.isCancelled) {
         [self.lock unlock];
         return;
     }
@@ -346,20 +368,22 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
         return;
     }
     OOHTTPRetryInterval interval=self.retryAfter(self,++self.currentRetryTime,error);
-    if (interval==HTTRetryDisabled) {
+    if (interval==OOHTTRetryDisabled) {
         self.ooExecuting=NO;
         self.ooFinished=YES;
         [self notify:nil error:self.latestError];
         [self.lock unlock];
         return;
     }
+    OOHTTPLog(@"task will retry after:%.2f",interval);
     __weak typeof(self) weakSelf=self;
     self.after = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, [NSOperationQueue currentQueue].underlyingQueue?[NSOperationQueue currentQueue].underlyingQueue:dispatch_get_main_queue());
-    dispatch_source_set_timer(self.after, DISPATCH_TIME_NOW, interval * NSEC_PER_SEC, 0 * NSEC_PER_SEC);
+    dispatch_source_set_timer(self.after, dispatch_walltime(DISPATCH_TIME_NOW, interval*NSEC_PER_SEC), DBL_MAX * NSEC_PER_SEC, 0 * NSEC_PER_SEC);
     dispatch_source_set_event_handler(self.after, ^{
         __strong typeof(weakSelf) self=weakSelf;
         dispatch_source_cancel(self.after);
         self.after=nil;
+        OOHTTPLog(@"task retrying:%d",self.currentRetryTime);
         [self _start];
     });
     dispatch_resume(self.after);
@@ -369,15 +393,19 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
 - (void)notify:(id)responseObject error:(NSError*)error{
     [self.sessionManager.requestSerializer oo_http_removeHTTPHeadersForKey:self.urlStringWithHeaderKey];
     if(self.completion) self.completion(self,responseObject,error);
+    OOHTTPLog(@"task finished:%@",error);
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context{
     if (context!=OOHTTPContext) return;
-    if (![keyPath isEqualToString:@"taskQueue.isSuspended"]) return;
+    if (![keyPath isEqualToString:@"taskQueue.suspended"]) return;
     [self.lock lock];
-    BOOL old =[change[NSKeyValueChangeOldKey] boolValue];
+    BOOL old =change[NSKeyValueChangeOldKey]==NSNull.null?NO:[change[NSKeyValueChangeOldKey] boolValue];
     BOOL new =[change[NSKeyValueChangeNewKey] boolValue];
-    if (old==new) return;
+    if (old==new) {
+        [self.lock unlock];
+        return;
+    }
     if (new) [self _cancel];
     else [self _start];
     [self.lock unlock];

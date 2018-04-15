@@ -12,7 +12,11 @@
 
 #ifndef OOHTTPRetryInterval
 #define OOHTTPRetryInterval NSTimeInterval
-#define HTTRetryDisabled 0
+#define OOHTTRetryDisabled 0
+#endif
+
+#ifndef OOHTTPLogEnabled
+#define OOHTTPLogEnabled 0
 #endif
 
 @interface OOHTTPTask : NSOperation
@@ -28,15 +32,7 @@
 
 @interface OOHTTPTaskQueue : NSOperationQueue
 
-- (void)addOperation:(NSOperation *)op NS_UNAVAILABLE;
-
-- (void)addOperationWithBlock:(void (^)(void))block NS_UNAVAILABLE;
-
-- (void)addOperations:(NSArray<NSOperation *> *)ops waitUntilFinished:(BOOL)wait NS_UNAVAILABLE;
-
-- (void)setSuspended:(BOOL)suspended NS_UNAVAILABLE;
-
-- (instancetype)initWithHTTPSessionManager:(AFHTTPSessionManager*)sessionManager taskClass:(Class)taskClass NS_DESIGNATED_INITIALIZER; 
+- (instancetype)initWithHTTPSessionManager:(AFHTTPSessionManager*)sessionManager taskClass:(Class)taskClass NS_DESIGNATED_INITIALIZER;
 
 - (OOHTTPTask *)GET:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter   downloadProgress:(void (^)(NSProgress *progress))downloadProgress completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion;
 
