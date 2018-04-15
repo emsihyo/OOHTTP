@@ -12,7 +12,8 @@
 #import "OOHTTPTaskQueue.h"
 
 #if OOHTTPLogEnabled
-#define OOHTTPLog(format, ...) printf("\n%s\n",[[NSString stringWithFormat:format, ## __VA_ARGS__] UTF8String])
+#define NSLog(format, ...) printf("\n%s\n",[[NSString stringWithFormat:format, ## __VA_ARGS__] UTF8String]);
+#define OOHTTPLog(...) NSLog(__VA_ARGS__)
 #else
 #define OOHTTPLog(x,...)
 #endif
@@ -107,9 +108,7 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
     self.backgroundTaskId=[[UIApplication sharedApplication]beginBackgroundTaskWithExpirationHandler:^{
         OOHTTPLog(@"background task expire");
         __strong typeof(weakSelf) self = weakSelf;
-        OOHTTPLog(@"task count:%d",(int)self.operationCount);
         self.suspended=YES;
-        OOHTTPLog(@"task count:%d",(int)self.operationCount);
         self.backgroundTaskId=UIBackgroundTaskInvalid;
     }];
 }
