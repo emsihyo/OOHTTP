@@ -1,12 +1,12 @@
 Pod::Spec.new do |s|
     s.name     = 'OOHTTP'
-    s.version  = '1.0.1'
+    s.version  = '2.0.0'
     s.license  = 'MIT'
-    s.summary  = 'HTTP framework'
+    s.summary  = 'HTTP task'
     s.homepage = 'https://github.com/emsihyo/OOHTTP'
     s.author   = { 'emsihyo' => 'emsihyo@gmail.com' }
     s.source   = { :git => 'https://github.com/emsihyo/OOHTTP.git',:tag => "#{s.version}" }
-    s.description = 'custom HTTP framework based on AFNetworking'
+    s.description = 'custom HTTP task based on AFNetworking'
     s.requires_arc = true
     s.platform = :ios
     s.ios.deployment_target = '8.0'
