@@ -55,8 +55,9 @@
     [[NSNotificationCenter defaultCenter]removeObserver:self];
 }
 
-+ (instancetype)taskWithTaskType:(OOHTTPTaskType)taskType Url:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter constructingBody:(void (^)(id <AFMultipartFormData> formData))constructingBody uploadProgress:(void (^)(NSProgress *progress))uploadProgress downloadProgress:(void (^)(NSProgress *progress))downloadProgress completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion{
++ (instancetype)task:(AFHTTPSessionManager*)sessionManager taskType:(OOHTTPTaskType)taskType Url:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter constructingBody:(void (^)(id <AFMultipartFormData> formData))constructingBody uploadProgress:(void (^)(NSProgress *progress))uploadProgress downloadProgress:(void (^)(NSProgress *progress))downloadProgress completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion{
     OOHTTPTask *task=[[self alloc]init];
+    task.sessionManager=sessionManager;
     task.taskType=taskType;
     task.urlString=[url isKindOfClass:NSURL.class]?[url absoluteString]:url;
     task.headers=headers;
@@ -69,28 +70,28 @@
     return task;
 }
 
-+ (instancetype)GET:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter downloadProgress:(void (^)(NSProgress *progress))downloadProgress completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion{
-    return [self taskWithTaskType:OOHTTPTaskTypeGet Url:url headers:headers parameters:parameters retryAfter:retryAfter constructingBody:nil uploadProgress:nil downloadProgress:downloadProgress completion:completion];
++ (instancetype)GET:(AFHTTPSessionManager*)sessionManager url:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter downloadProgress:(void (^)(NSProgress *progress))downloadProgress completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion{
+    return [self task:sessionManager taskType:OOHTTPTaskTypeGet Url:url headers:headers parameters:parameters retryAfter:retryAfter constructingBody:nil uploadProgress:nil downloadProgress:downloadProgress completion:completion];
 }
 
-+ (instancetype)POST:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter constructingBody:(void (^)(id <AFMultipartFormData> formData))constructingBody uploadProgress:(void (^)(NSProgress *progress))uploadProgress completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion{
-    return [self taskWithTaskType:OOHTTPTaskTypePost Url:url headers:headers parameters:parameters retryAfter:retryAfter constructingBody:constructingBody uploadProgress:uploadProgress downloadProgress:nil completion:completion];
++ (instancetype)POST:(AFHTTPSessionManager*)sessionManager url:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter constructingBody:(void (^)(id <AFMultipartFormData> formData))constructingBody uploadProgress:(void (^)(NSProgress *progress))uploadProgress completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion{
+    return [self task:sessionManager taskType:OOHTTPTaskTypePost Url:url headers:headers parameters:parameters retryAfter:retryAfter constructingBody:constructingBody uploadProgress:uploadProgress downloadProgress:nil completion:completion];
 }
 
-+ (instancetype)HEAD:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion{
-    return [self taskWithTaskType:OOHTTPTaskTypeHead Url:url headers:headers parameters:parameters retryAfter:retryAfter constructingBody:nil uploadProgress:nil downloadProgress:nil completion:completion];
++ (instancetype)HEAD:(AFHTTPSessionManager*)sessionManager url:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion{
+    return [self task:sessionManager taskType:OOHTTPTaskTypeHead Url:url headers:headers parameters:parameters retryAfter:retryAfter constructingBody:nil uploadProgress:nil downloadProgress:nil completion:completion];
 }
 
-+ (instancetype)PUT:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion{
-    return [self taskWithTaskType:OOHTTPTaskTypePut Url:url headers:headers parameters:parameters retryAfter:retryAfter constructingBody:nil uploadProgress:nil downloadProgress:nil completion:completion];
++ (instancetype)PUT:(AFHTTPSessionManager*)sessionManager url:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion{
+    return [self task:sessionManager taskType:OOHTTPTaskTypePut Url:url headers:headers parameters:parameters retryAfter:retryAfter constructingBody:nil uploadProgress:nil downloadProgress:nil completion:completion];
 }
 
-+ (instancetype)PATCH:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion{
-    return [self taskWithTaskType:OOHTTPTaskTypePatch Url:url headers:headers parameters:parameters retryAfter:retryAfter constructingBody:nil uploadProgress:nil downloadProgress:nil completion:completion];
++ (instancetype)PATCH:(AFHTTPSessionManager*)sessionManager url:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion{
+    return [self task:sessionManager taskType:OOHTTPTaskTypePatch Url:url headers:headers parameters:parameters retryAfter:retryAfter constructingBody:nil uploadProgress:nil downloadProgress:nil completion:completion];
 }
 
-+ (instancetype)DELETE:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion{
-    return [self taskWithTaskType:OOHTTPTaskTypeDelete Url:url headers:headers parameters:parameters retryAfter:retryAfter constructingBody:nil uploadProgress:nil downloadProgress:nil completion:completion];
++ (instancetype)DELETE:(AFHTTPSessionManager*)sessionManager url:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *error))retryAfter completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion{
+    return [self task:sessionManager taskType:OOHTTPTaskTypeDelete Url:url headers:headers parameters:parameters retryAfter:retryAfter constructingBody:nil uploadProgress:nil downloadProgress:nil completion:completion];
 }
 
 - (instancetype)init{
