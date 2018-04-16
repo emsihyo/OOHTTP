@@ -39,9 +39,9 @@
 @property (nonatomic,strong) NSString       *urlStringWithHeaderKey;
 @property (nonatomic,strong) id             responseObject;
 
-@property (nonatomic,strong) OOHTTPRetryInterval (^retryAfter)(OOHTTPTask * task,NSInteger currentRetryTime,NSError * error);
+@property (nonatomic,strong) OOHTTPRetryInterval (^retryAfter)(OOHTTPTask * task,NSInteger currentRetryTime,NSError * latestError);
 @property (nonatomic,strong) void (^constructingBody) (id <AFMultipartFormData> formData);
-@property (nonatomic,strong) void (^completion)(OOHTTPTask *task,id reponseObject,NSError* latestError);
+@property (nonatomic,strong) void (^completion)(OOHTTPTask *task,id reponseObject,NSError* error);
 @property (nonatomic,strong) void (^uploadProgress) (NSProgress * progress);
 @property (nonatomic,strong) void (^downloadProgress) (NSProgress * progress);
 @property (nonatomic,strong) dispatch_source_t after;
