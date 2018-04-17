@@ -92,7 +92,6 @@
 
 - (void)start{
     [self.lock lock];
-    [super start];
     [self beginBackgroundTask];
     [self _start];
     [self.lock unlock];
@@ -100,22 +99,11 @@
 
 - (void)cancel{
     [self.lock lock];
+    [super cancel];
     [self _cancel];
     self.latestError=[NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorCancelled userInfo:@{NSLocalizedDescriptionKey:NSLocalizedString(@"The connection was cancelled.", nil)}];
     [self complete];
-    [super cancel];
     [self.lock unlock];
-}
-
-- (void)_cancel{
-    if (self.after) {
-        dispatch_source_cancel(self.after);
-        self.after=nil;
-    }
-    if (self.sessionTask) {
-        [self.sessionTask cancel];
-        self.sessionTask=nil;
-    }
 }
 
 - (void)_start{
@@ -194,6 +182,17 @@
     }
 }
 
+- (void)_cancel{
+    if (self.after) {
+        dispatch_source_cancel(self.after);
+        self.after=nil;
+    }
+    if (self.sessionTask) {
+        [self.sessionTask cancel];
+        self.sessionTask=nil;
+    }
+}
+
 - (void)taskDidFinish:(NSURLSessionTask *)task response:(id)responseObject error:(NSError *)error{
     [self.lock lock];
     self.sessionTask=nil;
@@ -229,9 +228,11 @@
     dispatch_source_set_timer(self.after, dispatch_walltime(DISPATCH_TIME_NOW, interval*NSEC_PER_SEC), DBL_MAX * NSEC_PER_SEC, 0 * NSEC_PER_SEC);
     dispatch_source_set_event_handler(self.after, ^{
         __strong typeof(weakSelf) self=weakSelf;
+        [self.lock lock];
         dispatch_source_cancel(self.after);
         self.after=nil;
         [self _start];
+        [self.lock unlock];
     });
     dispatch_resume(self.after);
 //    NSLog(@"\ntask did fail, will retry after interval:%.2f",interval);
@@ -245,8 +246,8 @@
     if(self.completion) dispatch_async(self.sessionManager.completionQueue?self.sessionManager.completionQueue:dispatch_get_main_queue(), ^{
         self.completion(self,self.responseObject,self.latestError);
     });
+//    NSLog(@"\ntask did complete with error:%@",self.latestError);
     [self endBackgroundTask];
-//    NSLog(@"\ntask did finish with error:%@",self.latestError);
 }
 
 - (void)applicationDidBecomeActive:(NSNotification*)nf{
