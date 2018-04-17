@@ -10,10 +10,6 @@
 
 #import <Foundation/Foundation.h>
 
-#ifndef OOHTTPLogEnabled
-#define OOHTTPLogEnabled 0
-#endif
-
 typedef NSTimeInterval OOHTTPRetryInterval;
 
 #ifndef OOHTTPRetryDisabled
@@ -38,9 +34,6 @@ typedef NS_ENUM(NSInteger,OOHTTPTaskType) {
 @property (readonly) NSString         *urlString;
 @property (readonly) OOHTTPTaskType   taskType;
 @property (readonly) id               responseObject;
-
-@property (readonly) NSTimeInterval   totalDuration;
-@property (readonly) NSTimeInterval   latestDuration;
 
 + (instancetype)GET:(AFHTTPSessionManager*)sessionManager url:(id)url headers:(NSDictionary*)headers parameters:(id)parameters retryAfter:(OOHTTPRetryInterval(^)(OOHTTPTask *task,NSInteger currentRetryTime,NSError *latestError))retryAfter downloadProgress:(void (^)(NSProgress *progress))downloadProgress completion:(void(^)(OOHTTPTask *task,id responseObject,NSError* error))completion;
 

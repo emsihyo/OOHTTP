@@ -7,6 +7,18 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0A052C4E20863CF300287A7B /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A052C4D20863CF300287A7B /* AppDelegate.m */; };
+		0A052C5120863CF300287A7B /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A052C5020863CF300287A7B /* ViewController.m */; };
+		0A052C5420863CF300287A7B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0A052C5220863CF300287A7B /* Main.storyboard */; };
+		0A052C5620863CF400287A7B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0A052C5520863CF400287A7B /* Assets.xcassets */; };
+		0A052C5920863CF400287A7B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0A052C5720863CF400287A7B /* LaunchScreen.storyboard */; };
+		0A052C5C20863CF400287A7B /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A052C5B20863CF400287A7B /* main.m */; };
+		0A052C6D20863D1A00287A7B /* OOHTTP.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0A3F7E6F20805D9800FDA9E1 /* OOHTTP.framework */; };
+		0A052C6E20863D1A00287A7B /* OOHTTP.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 0A3F7E6F20805D9800FDA9E1 /* OOHTTP.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		0A052C7220863D6E00287A7B /* AFNetworking.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0AB762422081CEBB008EA2B8 /* AFNetworking.framework */; };
+		0A052C7320863D6E00287A7B /* AFNetworking.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 0AB762422081CEBB008EA2B8 /* AFNetworking.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		0A052C7620863F1100287A7B /* JRSwizzle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0AB7614F2081CE61008EA2B8 /* JRSwizzle.framework */; };
+		0A052C7720863F1100287A7B /* JRSwizzle.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 0AB7614F2081CE61008EA2B8 /* JRSwizzle.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		0A3F7E7420805D9800FDA9E1 /* OOHTTP.h in Headers */ = {isa = PBXBuildFile; fileRef = 0A3F7E7220805D9800FDA9E1 /* OOHTTP.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0A3F7E8720805E4D00FDA9E1 /* OOHTTPTask.h in Headers */ = {isa = PBXBuildFile; fileRef = 0A3F7E7B20805E4B00FDA9E1 /* OOHTTPTask.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0A3F7E8A20805E4D00FDA9E1 /* AFJSONRequestSerializer+OOHTTP.h in Headers */ = {isa = PBXBuildFile; fileRef = 0A3F7E7E20805E4C00FDA9E1 /* AFJSONRequestSerializer+OOHTTP.h */; };
@@ -23,6 +35,27 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		0A052C6F20863D1A00287A7B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0A3F7E6620805D9800FDA9E1 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0A3F7E6E20805D9800FDA9E1;
+			remoteInfo = OOHTTP;
+		};
+		0A052C7420863D6E00287A7B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0AB761EC2081CEBB008EA2B8 /* AFNetworking.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 299522381BBF104D00859F49;
+			remoteInfo = "AFNetworking iOS";
+		};
+		0A052C7820863F1100287A7B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0A3F7E6620805D9800FDA9E1 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0AB7614E2081CE61008EA2B8;
+			remoteInfo = JRSwizzle;
+		};
 		0AB7622B2081CEBB008EA2B8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 0AB761AC2081CEBB008EA2B8 /* AFNetworking Example.xcodeproj */;
@@ -137,7 +170,33 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		0A052C7120863D1A00287A7B /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				0A052C7720863F1100287A7B /* JRSwizzle.framework in Embed Frameworks */,
+				0A052C6E20863D1A00287A7B /* OOHTTP.framework in Embed Frameworks */,
+				0A052C7320863D6E00287A7B /* AFNetworking.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		0A052C4A20863CF200287A7B /* Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0A052C4C20863CF200287A7B /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		0A052C4D20863CF300287A7B /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		0A052C4F20863CF300287A7B /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
+		0A052C5020863CF300287A7B /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		0A052C5320863CF300287A7B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		0A052C5520863CF400287A7B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		0A052C5820863CF400287A7B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		0A052C5A20863CF400287A7B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		0A052C5B20863CF400287A7B /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		0A3F7E6F20805D9800FDA9E1 /* OOHTTP.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = OOHTTP.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		0A3F7E7220805D9800FDA9E1 /* OOHTTP.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OOHTTP.h; sourceTree = "<group>"; };
 		0A3F7E7320805D9800FDA9E1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -319,6 +378,16 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		0A052C4720863CF200287A7B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0A052C7620863F1100287A7B /* JRSwizzle.framework in Frameworks */,
+				0A052C6D20863D1A00287A7B /* OOHTTP.framework in Frameworks */,
+				0A052C7220863D6E00287A7B /* AFNetworking.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		0A3F7E6B20805D9800FDA9E1 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -338,12 +407,29 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0A052C4B20863CF200287A7B /* Example */ = {
+			isa = PBXGroup;
+			children = (
+				0A052C4C20863CF200287A7B /* AppDelegate.h */,
+				0A052C4D20863CF300287A7B /* AppDelegate.m */,
+				0A052C4F20863CF300287A7B /* ViewController.h */,
+				0A052C5020863CF300287A7B /* ViewController.m */,
+				0A052C5220863CF300287A7B /* Main.storyboard */,
+				0A052C5520863CF400287A7B /* Assets.xcassets */,
+				0A052C5720863CF400287A7B /* LaunchScreen.storyboard */,
+				0A052C5A20863CF400287A7B /* Info.plist */,
+				0A052C5B20863CF400287A7B /* main.m */,
+			);
+			path = Example;
+			sourceTree = "<group>";
+		};
 		0A3F7E6520805D9800FDA9E1 = {
 			isa = PBXGroup;
 			children = (
 				0AB7615B2081CEBA008EA2B8 /* AFNetworking */,
 				0A3F7E7120805D9800FDA9E1 /* OOHTTP */,
 				0AB761502081CE61008EA2B8 /* JRSwizzle */,
+				0A052C4B20863CF200287A7B /* Example */,
 				0A3F7E7020805D9800FDA9E1 /* Products */,
 				0AB762532081CEDB008EA2B8 /* Frameworks */,
 			);
@@ -354,6 +440,7 @@
 			children = (
 				0A3F7E6F20805D9800FDA9E1 /* OOHTTP.framework */,
 				0AB7614F2081CE61008EA2B8 /* JRSwizzle.framework */,
+				0A052C4A20863CF200287A7B /* Example.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -856,6 +943,27 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		0A052C4920863CF200287A7B /* Example */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0A052C6C20863CF400287A7B /* Build configuration list for PBXNativeTarget "Example" */;
+			buildPhases = (
+				0A052C4620863CF200287A7B /* Sources */,
+				0A052C4720863CF200287A7B /* Frameworks */,
+				0A052C4820863CF200287A7B /* Resources */,
+				0A052C7120863D1A00287A7B /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				0A052C7020863D1A00287A7B /* PBXTargetDependency */,
+				0A052C7520863D6E00287A7B /* PBXTargetDependency */,
+				0A052C7920863F1100287A7B /* PBXTargetDependency */,
+			);
+			name = Example;
+			productName = Example;
+			productReference = 0A052C4A20863CF200287A7B /* Example.app */;
+			productType = "com.apple.product-type.application";
+		};
 		0A3F7E6E20805D9800FDA9E1 /* OOHTTP */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 0A3F7E7720805D9800FDA9E1 /* Build configuration list for PBXNativeTarget "OOHTTP" */;
@@ -903,6 +1011,9 @@
 				LastUpgradeCheck = 0930;
 				ORGANIZATIONNAME = emsihyo;
 				TargetAttributes = {
+					0A052C4920863CF200287A7B = {
+						CreatedOnToolsVersion = 9.3;
+					};
 					0A3F7E6E20805D9800FDA9E1 = {
 						CreatedOnToolsVersion = 9.3;
 					};
@@ -940,6 +1051,7 @@
 			targets = (
 				0A3F7E6E20805D9800FDA9E1 /* OOHTTP */,
 				0AB7614E2081CE61008EA2B8 /* JRSwizzle */,
+				0A052C4920863CF200287A7B /* Example */,
 			);
 		};
 /* End PBXProject section */
@@ -1046,6 +1158,16 @@
 /* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
+		0A052C4820863CF200287A7B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0A052C5920863CF400287A7B /* LaunchScreen.storyboard in Resources */,
+				0A052C5620863CF400287A7B /* Assets.xcassets in Resources */,
+				0A052C5420863CF300287A7B /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		0A3F7E6D20805D9800FDA9E1 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1063,6 +1185,16 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		0A052C4620863CF200287A7B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0A052C5120863CF300287A7B /* ViewController.m in Sources */,
+				0A052C5C20863CF400287A7B /* main.m in Sources */,
+				0A052C4E20863CF300287A7B /* AppDelegate.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		0A3F7E6A20805D9800FDA9E1 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1085,6 +1217,21 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		0A052C7020863D1A00287A7B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0A3F7E6E20805D9800FDA9E1 /* OOHTTP */;
+			targetProxy = 0A052C6F20863D1A00287A7B /* PBXContainerItemProxy */;
+		};
+		0A052C7520863D6E00287A7B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "AFNetworking iOS";
+			targetProxy = 0A052C7420863D6E00287A7B /* PBXContainerItemProxy */;
+		};
+		0A052C7920863F1100287A7B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0AB7614E2081CE61008EA2B8 /* JRSwizzle */;
+			targetProxy = 0A052C7820863F1100287A7B /* PBXContainerItemProxy */;
+		};
 		0AB762502081CEC6008EA2B8 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 0AB7614E2081CE61008EA2B8 /* JRSwizzle */;
@@ -1098,6 +1245,22 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
+		0A052C5220863CF300287A7B /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				0A052C5320863CF300287A7B /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		0A052C5720863CF400287A7B /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				0A052C5820863CF400287A7B /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
 		0AB761662081CEBA008EA2B8 /* MainInterface.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -1141,6 +1304,40 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		0A052C5D20863CF400287A7B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = N4WZ33Z6KM;
+				INFOPLIST_FILE = Example/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.emsihyo.OOHTTP.Example;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		0A052C5E20863CF400287A7B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = N4WZ33Z6KM;
+				INFOPLIST_FILE = Example/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.emsihyo.OOHTTP.Example;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		0A3F7E7520805D9800FDA9E1 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1263,7 +1460,7 @@
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Manual;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = N4WZ33Z6KM;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -1289,7 +1486,7 @@
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Manual;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = N4WZ33Z6KM;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -1315,7 +1512,7 @@
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Manual;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = N4WZ33Z6KM;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -1340,7 +1537,7 @@
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Manual;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = N4WZ33Z6KM;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -1362,6 +1559,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		0A052C6C20863CF400287A7B /* Build configuration list for PBXNativeTarget "Example" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0A052C5D20863CF400287A7B /* Debug */,
+				0A052C5E20863CF400287A7B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		0A3F7E6920805D9800FDA9E1 /* Build configuration list for PBXProject "OOHTTP" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
