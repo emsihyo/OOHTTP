@@ -6,9 +6,7 @@
 //  Copyright © 2018年 emsihyo. All rights reserved.
 //
 
-@import AFNetworking;
-
-#import <Foundation/Foundation.h>
+#import <AFNetworking/AFNetworking.h>
 
 typedef NSTimeInterval OOHTTPRetryInterval;
 
