@@ -8,18 +8,6 @@
 
 #import <AFNetworking/AFNetworking.h>
 
-extern NSString *const oo_http_header_key;
-
-void oo_http_parseHeaders(id source,NSDictionary *allHeaders,NSURL **targetUrl,NSDictionary **targetHeaders);
-
 @interface AFHTTPRequestSerializer (OOHTTP)
-
-- (NSDictionary*)oo_allHeaders;
-
-- (NSDictionary*)oo_http_httpHeadersForKey:(NSString*)key;
-
-- (void)oo_http_setHTTPHeaders:(NSDictionary*)headers forKey:(NSString*)key;
-
-- (void)oo_http_removeHTTPHeadersForKey:(NSString*)key;
 
 @end

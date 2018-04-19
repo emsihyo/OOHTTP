@@ -6,7 +6,7 @@
 //  Copyright © 2018年 emsihyo. All rights reserved.
 //
 #import <UIKit/UIKit.h>
-#import <OOHTTP/OOHTTPTask.h>
+#import <OOHTTP/AFHTTPSessionManager+OOHTTP.h>
 
 //! Project version number for OOHTTP.
 FOUNDATION_EXPORT double OOHTTPVersionNumber;

@@ -145,10 +145,14 @@ strip_invalid_archs() {
 if [[ "$CONFIGURATION" == "Debug" ]]; then
   install_framework "${BUILT_PRODUCTS_DIR}/AFNetworking/AFNetworking.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/JRSwizzle/JRSwizzle.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/Retriable/Retriable.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/RetriableAFNetworking/RetriableAFNetworking.framework"
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
   install_framework "${BUILT_PRODUCTS_DIR}/AFNetworking/AFNetworking.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/JRSwizzle/JRSwizzle.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/Retriable/Retriable.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/RetriableAFNetworking/RetriableAFNetworking.framework"
 fi
 if [ "${COCOAPODS_PARALLEL_CODE_SIGN}" == "true" ]; then
   wait

@@ -11,9 +11,8 @@
 #import "ViewController.h"
 
 @interface ViewController ()
-@property (nonatomic,strong)OOHTTPTask *task;
+
 @property (nonatomic,strong)AFHTTPSessionManager *sesssionManager;
-@property (nonatomic,strong)NSOperationQueue *taskQueue;
 
 @end
 
@@ -22,16 +21,23 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     NSURLSessionConfiguration *cfg=[NSURLSessionConfiguration defaultSessionConfiguration];
-    cfg.timeoutIntervalForRequest=10;
-    cfg.timeoutIntervalForResource=10;
+    cfg.timeoutIntervalForRequest=2;
+    cfg.timeoutIntervalForResource=2;
     self.sesssionManager=[[AFHTTPSessionManager alloc]initWithSessionConfiguration:cfg];
-    self.taskQueue=[[NSOperationQueue alloc]init];
-    self.task=[OOHTTPTask GET:self.sesssionManager url:@"https://www.google.com" headers:nil parameters:nil retryAfter:^OOHTTPRetryInterval(OOHTTPTask *task, NSInteger currentRetryTime, NSError *latestError) {
-        return 5;
-    } downloadProgress:nil completion:^(OOHTTPTask *task, id responseObject, NSError *error) {
-        NSLog(@"\nresponse: %@\nerror:%@",responseObject,error);
+    self.sesssionManager.completionQueue=dispatch_queue_create("session.queue", DISPATCH_QUEUE_SERIAL);
+    [self.sesssionManager oo_http_GET:@"https://www.baidu.com" headers:@{@"xxxx-xxxx":@"oooo-oooo"} parameters:nil progress:nil success:^(NSURLSessionDataTask *task, id responseObject) {
+        
+    } failure:^(NSURLSessionDataTask *task, NSError *error) {
+        
+    } retryAfter:^NSTimeInterval(id task, NSInteger currentRetryTime, NSError *latestError) {
+        if (![latestError.domain isEqualToString:NSURLErrorDomain]) return 0;
+        switch (latestError.code) {
+            case NSURLErrorTimedOut:
+            case NSURLErrorNetworkConnectionLost:
+            case NSURLErrorNotConnectedToInternet: return 1;
+            default: return 0;
+        }
     }];
-    [self.taskQueue addOperation:self.task];
     // Do any additional setup after loading the view, typically from a nib.
 }
 

@@ -1,0 +1,6 @@
+framework module RetriableAFNetworking {
+  umbrella header "RetriableAFNetworking-umbrella.h"
+
+  export *
+  module * { export * }
+}

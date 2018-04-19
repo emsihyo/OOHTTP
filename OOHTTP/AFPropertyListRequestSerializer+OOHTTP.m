@@ -8,15 +8,15 @@
 
 #import <JRSwizzle/JRSwizzle.h>
 
-#import "AFHTTPRequestSerializer+OOHTTP.h"
+#import "AFHTTPSessionManager+OOHTTP.h"
 #import "AFJSONRequestSerializer+OOHTTP.h"
 
 @implementation AFPropertyListRequestSerializer (OOHTTP)
 - (NSURLRequest *)oo_http_requestBySerializingRequest:(NSURLRequest *)req withParameters:(nullable id)parameters error:(NSError * _Nullable __autoreleasing *)error{
     NSMutableURLRequest *request=[req mutableCopy];
-    NSURL *url;NSDictionary *headers;
-    oo_http_parseHeaders(request.URL, self.oo_allHeaders, &url, &headers);
-    request.URL=url;
+    NSString *target;NSDictionary *headers;
+    oo_http_decode(req.URL.absoluteString, &target, &headers);
+    request.URL=[NSURL URLWithString:target];
     request=[[self oo_http_requestBySerializingRequest:request withParameters:parameters error:error] mutableCopy];
     return request;
 }

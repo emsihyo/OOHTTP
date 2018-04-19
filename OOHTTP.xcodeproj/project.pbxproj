@@ -16,14 +16,14 @@
 		0A052C6D20863D1A00287A7B /* OOHTTP.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0A3F7E6F20805D9800FDA9E1 /* OOHTTP.framework */; };
 		0A052C6E20863D1A00287A7B /* OOHTTP.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 0A3F7E6F20805D9800FDA9E1 /* OOHTTP.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		0A3F7E7420805D9800FDA9E1 /* OOHTTP.h in Headers */ = {isa = PBXBuildFile; fileRef = 0A3F7E7220805D9800FDA9E1 /* OOHTTP.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		0A3F7E8720805E4D00FDA9E1 /* OOHTTPTask.h in Headers */ = {isa = PBXBuildFile; fileRef = 0A3F7E7B20805E4B00FDA9E1 /* OOHTTPTask.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0A3F7E8A20805E4D00FDA9E1 /* AFJSONRequestSerializer+OOHTTP.h in Headers */ = {isa = PBXBuildFile; fileRef = 0A3F7E7E20805E4C00FDA9E1 /* AFJSONRequestSerializer+OOHTTP.h */; };
 		0A3F7E8C20805E4D00FDA9E1 /* AFPropertyListRequestSerializer+OOHTTP.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A3F7E8020805E4C00FDA9E1 /* AFPropertyListRequestSerializer+OOHTTP.m */; };
 		0A3F7E8D20805E4D00FDA9E1 /* AFHTTPRequestSerializer+OOHTTP.h in Headers */ = {isa = PBXBuildFile; fileRef = 0A3F7E8120805E4C00FDA9E1 /* AFHTTPRequestSerializer+OOHTTP.h */; };
-		0A3F7E8E20805E4D00FDA9E1 /* OOHTTPTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A3F7E8220805E4C00FDA9E1 /* OOHTTPTask.m */; };
 		0A3F7E8F20805E4D00FDA9E1 /* AFJSONRequestSerializer+OOHTTP.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A3F7E8320805E4C00FDA9E1 /* AFJSONRequestSerializer+OOHTTP.m */; };
 		0A3F7E9120805E4D00FDA9E1 /* AFPropertyListRequestSerializer+OOHTTP.h in Headers */ = {isa = PBXBuildFile; fileRef = 0A3F7E8520805E4C00FDA9E1 /* AFPropertyListRequestSerializer+OOHTTP.h */; };
 		0A3F7E9220805E4D00FDA9E1 /* AFHTTPRequestSerializer+OOHTTP.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A3F7E8620805E4D00FDA9E1 /* AFHTTPRequestSerializer+OOHTTP.m */; };
+		0A5CF6262088ECC900106219 /* AFHTTPSessionManager+OOHTTP.h in Headers */ = {isa = PBXBuildFile; fileRef = 0A5CF6242088ECC900106219 /* AFHTTPSessionManager+OOHTTP.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		0A5CF6272088ECC900106219 /* AFHTTPSessionManager+OOHTTP.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A5CF6252088ECC900106219 /* AFHTTPSessionManager+OOHTTP.m */; };
 		65124DE265D9193D9FDAF753 /* Pods_OOHTTP.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 38F3C33FE74C2BA45176CEFE /* Pods_OOHTTP.framework */; };
 		F4BA3620A11B56BF018DC419 /* Pods_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8E62DA4C3CE35006CFC42189 /* Pods_Example.framework */; };
 /* End PBXBuildFile section */
@@ -67,15 +67,15 @@
 		0A3F7E7220805D9800FDA9E1 /* OOHTTP.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OOHTTP.h; sourceTree = "<group>"; };
 		0A3F7E7320805D9800FDA9E1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0A3F7E7A20805DCB00FDA9E1 /* OOHTTP.podspec */ = {isa = PBXFileReference; lastKnownFileType = text; path = OOHTTP.podspec; sourceTree = SOURCE_ROOT; };
-		0A3F7E7B20805E4B00FDA9E1 /* OOHTTPTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OOHTTPTask.h; sourceTree = "<group>"; };
 		0A3F7E7E20805E4C00FDA9E1 /* AFJSONRequestSerializer+OOHTTP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AFJSONRequestSerializer+OOHTTP.h"; sourceTree = "<group>"; };
 		0A3F7E8020805E4C00FDA9E1 /* AFPropertyListRequestSerializer+OOHTTP.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AFPropertyListRequestSerializer+OOHTTP.m"; sourceTree = "<group>"; };
 		0A3F7E8120805E4C00FDA9E1 /* AFHTTPRequestSerializer+OOHTTP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AFHTTPRequestSerializer+OOHTTP.h"; sourceTree = "<group>"; };
-		0A3F7E8220805E4C00FDA9E1 /* OOHTTPTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OOHTTPTask.m; sourceTree = "<group>"; };
 		0A3F7E8320805E4C00FDA9E1 /* AFJSONRequestSerializer+OOHTTP.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AFJSONRequestSerializer+OOHTTP.m"; sourceTree = "<group>"; };
 		0A3F7E8520805E4C00FDA9E1 /* AFPropertyListRequestSerializer+OOHTTP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AFPropertyListRequestSerializer+OOHTTP.h"; sourceTree = "<group>"; };
 		0A3F7E8620805E4D00FDA9E1 /* AFHTTPRequestSerializer+OOHTTP.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AFHTTPRequestSerializer+OOHTTP.m"; sourceTree = "<group>"; };
 		0A3F7E93208062EF00FDA9E1 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
+		0A5CF6242088ECC900106219 /* AFHTTPSessionManager+OOHTTP.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "AFHTTPSessionManager+OOHTTP.h"; sourceTree = "<group>"; };
+		0A5CF6252088ECC900106219 /* AFHTTPSessionManager+OOHTTP.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "AFHTTPSessionManager+OOHTTP.m"; sourceTree = "<group>"; };
 		38F3C33FE74C2BA45176CEFE /* Pods_OOHTTP.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_OOHTTP.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3DCBC72FEE1013DAA36E8ED5 /* Pods-OOHTTP.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-OOHTTP.release.xcconfig"; path = "Pods/Target Support Files/Pods-OOHTTP/Pods-OOHTTP.release.xcconfig"; sourceTree = "<group>"; };
 		87FEF504FFCF9F467290B7D1 /* Pods-Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Example.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Example/Pods-Example.debug.xcconfig"; sourceTree = "<group>"; };
@@ -153,8 +153,8 @@
 				0A3F7E7320805D9800FDA9E1 /* Info.plist */,
 				0A3F7E7220805D9800FDA9E1 /* OOHTTP.h */,
 				0A3F7E7A20805DCB00FDA9E1 /* OOHTTP.podspec */,
-				0A3F7E7B20805E4B00FDA9E1 /* OOHTTPTask.h */,
-				0A3F7E8220805E4C00FDA9E1 /* OOHTTPTask.m */,
+				0A5CF6242088ECC900106219 /* AFHTTPSessionManager+OOHTTP.h */,
+				0A5CF6252088ECC900106219 /* AFHTTPSessionManager+OOHTTP.m */,
 				0A3F7E93208062EF00FDA9E1 /* README.md */,
 			);
 			path = OOHTTP;
@@ -188,7 +188,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0A3F7E7420805D9800FDA9E1 /* OOHTTP.h in Headers */,
-				0A3F7E8720805E4D00FDA9E1 /* OOHTTPTask.h in Headers */,
+				0A5CF6262088ECC900106219 /* AFHTTPSessionManager+OOHTTP.h in Headers */,
 				0A3F7E9120805E4D00FDA9E1 /* AFPropertyListRequestSerializer+OOHTTP.h in Headers */,
 				0A3F7E8D20805E4D00FDA9E1 /* AFHTTPRequestSerializer+OOHTTP.h in Headers */,
 				0A3F7E8A20805E4D00FDA9E1 /* AFJSONRequestSerializer+OOHTTP.h in Headers */,
@@ -340,11 +340,15 @@
 				"${SRCROOT}/Pods/Target Support Files/Pods-Example/Pods-Example-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/AFNetworking/AFNetworking.framework",
 				"${BUILT_PRODUCTS_DIR}/JRSwizzle/JRSwizzle.framework",
+				"${BUILT_PRODUCTS_DIR}/Retriable/Retriable.framework",
+				"${BUILT_PRODUCTS_DIR}/RetriableAFNetworking/RetriableAFNetworking.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/AFNetworking.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/JRSwizzle.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Retriable.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RetriableAFNetworking.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -370,8 +374,8 @@
 			files = (
 				0A3F7E9220805E4D00FDA9E1 /* AFHTTPRequestSerializer+OOHTTP.m in Sources */,
 				0A3F7E8F20805E4D00FDA9E1 /* AFJSONRequestSerializer+OOHTTP.m in Sources */,
-				0A3F7E8E20805E4D00FDA9E1 /* OOHTTPTask.m in Sources */,
 				0A3F7E8C20805E4D00FDA9E1 /* AFPropertyListRequestSerializer+OOHTTP.m in Sources */,
+				0A5CF6272088ECC900106219 /* AFHTTPSessionManager+OOHTTP.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -413,7 +417,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = N4WZ33Z6KM;
 				INFOPLIST_FILE = Example/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.emsihyo.OOHTTP.Example;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -428,7 +435,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = N4WZ33Z6KM;
 				INFOPLIST_FILE = Example/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.emsihyo.OOHTTP.Example;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -565,7 +575,11 @@
 				INFOPLIST_FILE = OOHTTP/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.emsihyo.OOHTTP;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -588,7 +602,11 @@
 				INFOPLIST_FILE = OOHTTP/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.emsihyo.OOHTTP;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
