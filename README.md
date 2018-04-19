@@ -2,7 +2,7 @@
 [![CocoaPods](http://img.shields.io/cocoapods/v/OOHTTP.svg?style=flat)](http://cocoapods.org/?q=OOHTTP)&nbsp;
 # OOHTTP
 
-Custom http manager based on AFNetworing.
+Free http headers for Retriable AFNetworking.
 
 #### Cocoapods
 
